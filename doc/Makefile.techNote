@@ -1,0 +1,48 @@
+
+DOXYGEN = /home/kerleyd/doxygen-1.8.12/bin/doxygen
+#DOXYGEN = doxygen
+
+ROOT_PATH = ../../../..
+COMMON_PATH = ${ROOT_PATH}/Common_Patterns
+ICDDB = ${ROOT_PATH}/TMT-ICD-DB-Model/NFIRAOS 
+
+COMP = component
+
+COMP_NAME = component-name
+TITLE = "Component Title"
+DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
+DATE = $(shell date +%F)
+
+all:
+	# copy required latex file to local dir
+	cp ${COMMON_PATH}/doc/latex/* ./latex 
+	# copy common section files (.sec)
+	cp ${COMMON_PATH}/doc/sec/* ./sec
+	# update asmPurpose section file
+	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmPurpose.sec
+	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmScope.sec
+	# parse model file
+	${COMMON_PATH}/script/parseModelFile.py ${ICDDB} ${COMP} ./sec
+	# get template doxygen config file
+	cp ${COMMON_PATH}/doc/template.doxconf ${COMP}.doxconf
+	# update doxygen config template 
+	sed -i -e '/^PROJECT_NAME *=/c\PROJECT_NAME = ${TITLE}' ${COMP}.doxconf
+	sed -i -e '/^PROJECT_NUMBER *=/c\PROJECT_NUMBER = ${DOC_NUM}' ${COMP}.doxconf
+	sed -i -e '/^PROJECT_BRIEF *=/c\PROJECT_BRIEF = ${DATE}' ${COMP}.doxconf
+	# Generate HTML from doxygen pages
+	${DOXYGEN} ${COMP}.doxconf .
+	# Generate PDF output
+	cd latex;	make pdf; cp refman.pdf ../${COMP}-techNote_${DATE}.pdf
+	# Prints the first 20 line of the error file
+	head -n 20 doxygen.errLog
+	#evince ./${COMP}-techNote_${DATE}.pdf &
+	#firefox ./html/index.html &
+
+clean:
+	/bin/rm -f ./html/*
+	/bin/rm -f ./latex/*
+	/bin/rm -f ./sec/*
+	/bin/rm -f ./${COMP}.doxconf
+	/bin/rm -f ./${COMP}-techNote_*.pdf
+	/bin/rm -f ./doxygen.errLog
+

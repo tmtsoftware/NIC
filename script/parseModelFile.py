@@ -24,7 +24,7 @@ def getEnumStr(enum):
     if k == len(enum)-1:
       str += "{0}".format(enum[k])
     else:
-      str += "{0} | ".format(enum[k])
+      str += "{0} <br> | ".format(enum[k])
   return str
 
 ## parse data type and build output string
