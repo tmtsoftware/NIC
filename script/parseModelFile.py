@@ -142,8 +142,8 @@ def writeComp(compDir, outDir):
   return prefix, title
 
 ##
-def writePub(compDir, outDir, prefix, title):
-  file = open(outDir+"/publish.sec", 'w')
+def writePubTelem(compDir, outDir, prefix, title):
+  file = open(outDir+"/publishTelem.sec", 'w')
 
   filename = compDir+"/publish-model.conf"
   if not os.path.isfile(filename):
@@ -188,8 +188,63 @@ def writePub(compDir, outDir, prefix, title):
           file.write("<td> "+rangeStr)
           file.write("<td> "+getVal(attr[j],'description'))
         file.write("\n</table>\n\n")
+  else:
+    file.write("N/A<br>\n")
 
   file.close()
+
+##
+def writePubEvent(compDir, outDir, prefix, title):
+  file = open(outDir+"/publishEvent.sec", 'w')
+
+  filename = compDir+"/publish-model.conf"
+  if not os.path.isfile(filename):
+    file.write("N/A<br>\n")
+    file.close()
+    return
+  conf = ConfigFactory.parse_file(filename)
+
+  if 'publish' not in conf:
+    return
+  pub = conf['publish']
+
+  if 'events' in pub:
+    tel = pub['events']
+
+    file.write("The {0} publishes the following event items:\n\n".format(title))
+
+    for i in range(0, len(tel)):
+      name = getVal(tel[i],'name')
+
+      file.write("<hr>\n")
+      file.write("\latexonly\n\subsection{"+name+" Event}\n\endlatexonly\n")
+      file.write("<b>Event item:</b> {0}.{1}<br>\n".format(prefix,name))  
+
+      if 'archive' in tel[i]:
+        file.write("<b>Archived:</b> {0}<br>\n".format(tel[i]['archive']))
+
+      str = getRateStr(tel[i])
+      if str != '':
+        file.write(str)
+
+      file.write("{0}<br>\n\n".format(getVal(tel[i],'description')))
+
+      if 'attributes' in tel[i]:
+        file.write("<table>\n<tr><th> Attribute <th> Data Type <th> Units <th> Range <th> Description\n")
+        attr = tel[i]['attributes']
+        for j in range(0, len(attr)):
+          file.write("<tr><td> "+getVal(attr[j],'name'))
+          dateType, rangeStr = getDtStr(attr[j])
+          file.write("<td> "+dateType)
+          file.write("<td> "+getVal(attr[j],'units'))
+          file.write("<td> "+rangeStr)
+          file.write("<td> "+getVal(attr[j],'description'))
+        file.write("\n</table>\n\n")
+  else:
+    file.write("N/A<br>\n")
+
+  file.close()
+
 
 ##
 def writeAlarm(compDir, outDir, prefix, title):
@@ -223,8 +278,8 @@ def writeAlarm(compDir, outDir, prefix, title):
 
 
 ##
-def writeSub(compDir, outDir, title):
-  file = open(outDir+"/subscribe.sec", 'w')
+def writeSubTelem(compDir, outDir, title):
+  file = open(outDir+"/subscribeTelem.sec", 'w')
 
   filename = compDir+"/subscribe-model.conf"
   if not os.path.isfile(filename):
@@ -250,8 +305,44 @@ def writeSub(compDir, outDir, title):
         file.write("<br><b>Usage:</b><br>"+tel[i]['usage'])
       file.write("\n")
     file.write("</table>\n")
+  else:
+    file.write("N/A<br>\n")
 
   file.close()
+
+##
+def writeSubEvent(compDir, outDir, title):
+  file = open(outDir+"/subscribeEvent.sec", 'w')
+
+  filename = compDir+"/subscribe-model.conf"
+  if not os.path.isfile(filename):
+    file.write("N/A<br>\n")
+    file.close()
+    return
+  conf = ConfigFactory.parse_file(filename)
+ 
+  if 'subscribe' not in conf:
+    return
+  sub = conf['subscribe']
+
+  if 'events' in sub:
+    tel = sub['events']
+
+    file.write("The {0} subscribes to the following event items:\n\n".format(title))
+
+    file.write("<table>\n<tr><th> Subscription <th> Rate (Hz)\n")
+    for i in range(0, len(tel)):
+      item, rate = getSubTableStr(tel[i])
+      file.write("<tr><td> {0} <td> {1}".format(item,rate))
+      if 'usage' in tel[i]:
+        file.write("<br><b>Usage:</b><br>"+tel[i]['usage'])
+      file.write("\n")
+    file.write("</table>\n")
+  else:
+    file.write("N/A<br>\n")
+
+  file.close()
+
 
 ##
 def writeCmd(compDir, outDir, prefix, title):
@@ -312,8 +403,10 @@ try:
 
   compDir = "{0}/{1}".format(inDir,compName)
   prefix, title = writeComp(compDir,outDir)
-  writeSub(compDir,outDir,title)
-  writePub(compDir,outDir,prefix,title)
+  writeSubTelem(compDir,outDir,title)
+  writeSubEvent(compDir,outDir,title)
+  writePubTelem(compDir,outDir,prefix,title)
+  writePubEvent(compDir,outDir,prefix,title)
   writeAlarm(compDir,outDir,prefix,title)
   writeCmd(compDir,outDir,prefix,title)
 
