@@ -46,6 +46,8 @@
 <tr><td> TT       <td> Tip/Tilt
 <tr><td> TTF	    <td> Tip/Tilt Focus
 <tr><td> TTS      <td> Tip/Tilt Stage
+<tr><td> TWFS     <td> Truth Wavefront Sensor
 <tr><td> VNW      <td> Visible Natural Wavefront Sensor
+<tr><td> WC       <td> Wavefront Corrector
 <tr><td> WFS      <td> Wavefront Sensor
 </table>

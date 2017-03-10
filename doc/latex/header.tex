@@ -1,4 +1,4 @@
-\documentclass[twoside]{book}
+\documentclass[12pt,openany,oneside]{book}
 
 % Packages required by doxygen
 \usepackage{fixltx2e}
@@ -140,5 +140,11 @@
 \end{titlepage}
 \pagenumbering{roman}
 \tableofcontents
+\addtocontents{toc}{~\hfill\textbf{Page}\par}
+\listoffigures
+\addtocontents{lof}{~\hfill\textbf{Page}\par}
+\listoftables
+\addtocontents{lot}{~\hfill\textbf{Page}\par}
+\clearpage
 \pagenumbering{arabic}
 \hypersetup{pageanchor=true}
