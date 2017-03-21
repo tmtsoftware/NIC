@@ -1,4 +1,5 @@
 <table>
+<tr><td> ACQ	    <td> Acquisition Camera
 <tr><td> ADC	    <td> Atmospheric Dispersion Compensator
 <tr><td> AO       <td> Adaptive Optics
 <tr><td> AOESW    <td> AO Executive Software
@@ -7,13 +8,22 @@
 <tr><td> CoG	    <td> Center of Gravity
 <tr><td> CP	      <td> Common Path
 <tr><td> CSW	    <td> Common Software
+<tr><td> DLCAM    <td> Diffraction Limited Camera
+<tr><td> DOF      <td> Degree(s) Of Freedom 
 <tr><td> DM       <td> Deformable Mirror
-<tr><td> EL       <td> Electronics 
+<tr><td> DME      <td> Deformable Mirror Electronics
+<tr><td> DMS      <td> Data Management System
+<tr><td> EE       <td> Electronics Enclosure
 <tr><td> ENCL     <td> Optical Enclosure  
 <tr><td> FOV      <td> Field of View
+<tr><td> FPM      <td> Focal Plane Mask
+<tr><td> FSM      <td> Fast Steering Mirror
 <tr><td> GMC	    <td> Galil Motor Controller 
 <tr><td> HCD	    <td> Hardware Control Daemon
+<tr><td> HRWFS    <td> High-Resolution Wavefront Sensor
 <tr><td> IP       <td> Internet Protocol
+<tr><td> IRIS     <td> InfraRed Imaging Spectrograph
+<tr><td> IRMS     <td> Infrared Multiple Object Spectrograph  
 <tr><td> ISM      <td> Instrument Selection Mirror
 <tr><td> LGS      <td> Laser Guide Star
 <tr><td> LGSF     <td> Laser Guide Star Facility
@@ -23,20 +33,24 @@
 <tr><td> NCP	    <td> Non-Common Path
 <tr><td> NFIRAOS  <td> Narrow Field Infrared Adaptive Optics System
 <tr><td> NGS      <td> Nature Guide Star
+<tr><td> NRTC     <td> NFIRAOS Real-Time Controller
+<tr><td> NSCU     <td> NFIRAOS Science Calibration Unit
 <tr><td> NSEN     <td> NFIRAOS Sensor
-<tr><td> NSS      <td> NFIRAOS Source Simulator 
 <tr><td> MCAO     <td> Multi-Conjugate Adaptive Optics
 <tr><td> MFU	    <td> Matched Filter Update
 <tr><td> MVM	    <td> Matrix Vector Multiply
-<tr><td> ODGW     <td> On Detector Guide Window
+<tr><td> ODGW     <td> On-Detector Guide Window
 <tr><td> OIWFS    <td> On-Instrument Wavefront Sensor
 <tr><td> OPT      <td> Optics
 <tr><td> OSS	    <td> Observatory Safety System
 <tr><td> OSW	    <td> Observatory Software
+<tr><td> PPM      <td> Pupil Plane Mask
 <tr><td> PSD      <td> Power Spectral Density
 <tr><td> PSFR     <td> Point Spread Function Reconstructor
 <tr><td> PWFS     <td> Pyramid Wavefront Sensor
+<tr><td> PWM      <td> Pulse Width Modulation
 <tr><td> RPG      <td> Reconstructor Parameter Generator 
+<tr><td> SS       <td> Source Simulator 
 <tr><td> SSM	    <td> Star Selection Mechanism
 <tr><td> TBC	    <td> To Be Confirmed or To Be Completed
 <tr><td> TBD	    <td> To Be Determined or To Be Defined or To Be Done
@@ -46,7 +60,9 @@
 <tr><td> TT       <td> Tip/Tilt
 <tr><td> TTF	    <td> Tip/Tilt Focus
 <tr><td> TTS      <td> Tip/Tilt Stage
+<tr><td> TTSE     <td> Tip/Tilt Stage Electronics
 <tr><td> TWFS     <td> Truth Wavefront Sensor
+<tr><td> VCAM     <td> Visible Camera
 <tr><td> VNW      <td> Visible Natural Wavefront Sensor
 <tr><td> WC       <td> Wavefront Corrector
 <tr><td> WFS      <td> Wavefront Sensor
