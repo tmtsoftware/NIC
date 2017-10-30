@@ -2,7 +2,7 @@ This document shall explain the design of the <<COMP_NAME>> Assembly and its rel
 
 This document is intended for:
 <ol type="a">
-<li> System engineers to understand if the NCC software properly incorporates the necessary functionality to control the <<COMP_NAME>> and meet the system's overall needs.
+<li> System engineers to understand if the <<COMP_NAME>> software properly incorporates the necessary functionality to control the <<COMP_NAME>> and meet the system's overall needs.
 <li> High level sequencer and AO executive software engineers to understand how to interact with the <<COMP_NAME>> Assembly by submitting commands and monitoring telemetry and progress.
-<li> Other NCC (assembly) developers to determine what information is published by the <<COMP_NAME>> Assembly can be utilized across other components.  
+<li> Other <<COMP_NAME>> (assembly) developers to determine what information is published by the <<COMP_NAME>> Assembly can be utilized across other components.  
 </ol>
