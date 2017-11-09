@@ -18,8 +18,10 @@
 <tr><td> FOV      <td> Field of View
 <tr><td> FPM      <td> Focal Plane Mask
 <tr><td> FSM      <td> Fast Steering Mirror
-<tr><td> GMC	    <td> Galil Motor Controller 
+<tr><td> GMC	    <td> Galil Motor Controller
+<tr><td> GUI	    <td> Graphical User Interface
 <tr><td> HCD	    <td> Hardware Control Daemon
+<tr><td> HOP	    <td> High-Order Processing
 <tr><td> HRWFS    <td> High-Resolution Wavefront Sensor
 <tr><td> IP       <td> Internet Protocol
 <tr><td> IRIS     <td> InfraRed Imaging Spectrograph
@@ -49,13 +51,15 @@
 <tr><td> PSFR     <td> Point Spread Function Reconstructor
 <tr><td> PWFS     <td> Pyramid Wavefront Sensor
 <tr><td> PWM      <td> Pulse Width Modulation
-<tr><td> RPG      <td> Reconstructor Parameter Generator 
+<tr><td> RPG      <td> Reconstructor Parameter Generator
+<tr><td> RPG      <td> Real-time Telemetry Storage
 <tr><td> SS       <td> Source Simulator 
 <tr><td> SSM	    <td> Star Selection Mechanism
 <tr><td> TBC	    <td> To Be Confirmed or To Be Completed
 <tr><td> TBD	    <td> To Be Determined or To Be Defined or To Be Done
 <tr><td> TCP	    <td> Transmission Control Protocol
 <tr><td> TCS      <td> Telescope Control System
+<tr><td> TED      <td> Telemetry and Engineering Display
 <tr><td> TMT      <td> Thirty Meter Telescope
 <tr><td> TT       <td> Tip/Tilt
 <tr><td> TTF	    <td> Tip/Tilt Focus
@@ -65,5 +69,6 @@
 <tr><td> VCAM     <td> Visible Camera
 <tr><td> VNW      <td> Visible Natural Wavefront Sensor
 <tr><td> WC       <td> Wavefront Corrector
+<tr><td> WCC      <td> Wavefront Corrector Control
 <tr><td> WFS      <td> Wavefront Sensor
 </table>
