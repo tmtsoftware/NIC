@@ -1,3 +1,7 @@
+#
+# Example top-level Makefile
+#
+
 SUBDIRS := $(wildcard */.)
 SUBDIRSCLEAN = $(addsuffix .clean,$(SUBDIRS))
 

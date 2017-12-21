@@ -1,0 +1,33 @@
+#
+#  
+#  Example deps.config file
+#
+
+####################
+# paths
+####################
+
+ifndef DOXYGEN
+DOXYGEN = doxygen
+endif
+
+# assumes PATTERN and ICDDB are siblings of NFIROAS
+
+ifndef ROOT_PATH
+ROOT_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../../../
+endif
+
+ifndef PATTERN_PATH
+PATTERN_PATH = ${ROOT_PATH}/designPatterns
+endif
+
+ifndef ICDDB_NF
+ICDDB_NF = ${ROOT_PATH}/ICD-Model-Files/NFIRAOS-Model-Files 
+endif
+
+####################
+# env vars
+####################
+
+DATE = $(shell date +%F)
+

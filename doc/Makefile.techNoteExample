@@ -1,30 +1,26 @@
+#
+# Example Tech Note Makefile
+#
 
-DOXYGEN = /home/kerleyd/doxygen-1.8.12/bin/doxygen
-#DOXYGEN = doxygen
-
-ROOT_PATH = ../../../..
-COMMON_PATH = ${ROOT_PATH}/Common_Patterns
-ICDDB = ${ROOT_PATH}/TMT-ICD-DB-Model/NFIRAOS 
+include ../../../util/config/deps.config
 
 COMP = component
-
 COMP_NAME = component-name
 TITLE = "Component Title"
 DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
-DATE = $(shell date +%F)
 
 all:
 	# copy required latex file to local dir
-	cp ${COMMON_PATH}/doc/latex/* ./latex 
+	cp ${PATTERN_PATH}/doc/latex/* ./latex 
 	# copy common section files (.sec)
-	cp ${COMMON_PATH}/doc/sec/* ./sec
+	cp ${PATTERN_PATH}/doc/sec/* ./sec
 	# update asmPurpose section file
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmPurpose.sec
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmScope.sec
 	# parse model file
-	${COMMON_PATH}/script/parseModelFile.py ${ICDDB} ${COMP} ./sec
+	${PATTERN_PATH}/script/parseModelFile.py ${ICDDB_NF} ${COMP} ./sec
 	# get template doxygen config file
-	cp ${COMMON_PATH}/doc/template.doxconf ${COMP}.doxconf
+	cp ${PATTERN_PATH}/doc/template.doxconf ${COMP}.doxconf
 	# update doxygen config template 
 	sed -i -e '/^PROJECT_NAME *=/c\PROJECT_NAME = ${TITLE}' ${COMP}.doxconf
 	sed -i -e '/^PROJECT_NUMBER *=/c\PROJECT_NUMBER = ${DOC_NUM}' ${COMP}.doxconf
