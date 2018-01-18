@@ -10,6 +10,12 @@ from pyhocon import ConfigFactory
 # subsystem pub/sub prefixes
 sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
 
+## Sanitize a string so that it displays correctly with latex
+def latexStr(str):
+  # Underscores need to be escaped.
+  str_sanitized = str.replace('_','\_')
+  return str_sanitized
+
 ## get a value from the directory, if not present then an empty string is returned
 def getVal(dir,name):
   val = ''
@@ -167,7 +173,7 @@ def writePubTelem(compDir, outDir, prefix, title):
       name = getVal(tel[i],'name')
 
       file.write("<hr>\n")
-      file.write("\latexonly\n\subsection{"+name+" Telemetry}\n\endlatexonly\n")
+      file.write("\latexonly\n\subsection{"+latexStr(name)+" Telemetry}\n\endlatexonly\n")
       file.write("<b>Telemetry item:</b> {0}.{1}<br>\n".format(prefix,name))  
 
       if 'archive' in tel[i]:
@@ -219,7 +225,7 @@ def writePubEvent(compDir, outDir, prefix, title):
       name = getVal(tel[i],'name')
 
       file.write("<hr>\n")
-      file.write("\latexonly\n\subsection{"+name+" Event}\n\endlatexonly\n")
+      file.write("\latexonly\n\subsection{"+latexStr(name)+" Event}\n\endlatexonly\n")
       file.write("<b>Event item:</b> {0}.{1}<br>\n".format(prefix,name))  
 
       if 'archive' in tel[i]:
@@ -367,7 +373,7 @@ def writeCmd(compDir, outDir, prefix, title):
       name = getVal(rec[i],'name')
 
       file.write("<hr>\n")
-      file.write("\latexonly\n\subsection{"+name+" Command}\n\endlatexonly\n")
+      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
 
