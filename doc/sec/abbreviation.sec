@@ -4,12 +4,14 @@
 <tr><td> AO       <td> Adaptive Optics
 <tr><td> AOESW    <td> AO Executive Software
 <tr><td> AOSQ     <td> AO Sequencer
+<tr><td> AT       <td> Alignment Telescope
 <tr><td> BS       <td> Beam-Splitter
-<tr><td> CAL	    <td> NFIRAOS CAL software
+<tr><td> CAL      <td> NFIRAOS Calibration 
+<tr><td> CALSW    <td> NFIRAOS Calibration Software
 <tr><td> CoG	    <td> Center of Gravity
 <tr><td> CP	      <td> Common Path
 <tr><td> CSW	    <td> Common Software
-<tr><td> DLCAM    <td> Diffraction Limited Camera
+<tr><td> DL       <td> Diffraction Limited 
 <tr><td> DOF      <td> Degree(s) Of Freedom 
 <tr><td> DM       <td> Deformable Mirror
 <tr><td> DME      <td> Deformable Mirror Electronics
@@ -20,6 +22,7 @@
 <tr><td> FPM      <td> Focal Plane Mask
 <tr><td> FSM      <td> Fast Steering Mirror
 <tr><td> GMC	    <td> Galil Motor Controller
+<tr><td> GRIO	    <td> Galil Remote I/O PLC
 <tr><td> GUI	    <td> Graphical User Interface
 <tr><td> HCD	    <td> Hardware Control Daemon
 <tr><td> HOP	    <td> High-Order Processing
@@ -32,6 +35,7 @@
 <tr><td> LGSF     <td> Laser Guide Star Facility
 <tr><td> LO	      <td> Low Order
 <tr><td> LOT	    <td> Low Order Truth
+<tr><td> NCAM     <td> NFIRAOS Sensor Camera
 <tr><td> NCC      <td> NFIRAOS Component Controller
 <tr><td> NCP	    <td> Non-Common Path
 <tr><td> NFIRAOS  <td> Narrow Field Infrared Adaptive Optics System
@@ -49,12 +53,14 @@
 <tr><td> OPT      <td> Optics
 <tr><td> OSS	    <td> Observatory Safety System
 <tr><td> OSW	    <td> Observatory Software
+<tr><td> PLC      <td> Programmable Logic Controller
 <tr><td> POL      <td> Pseudo Open Loop
 <tr><td> PPM      <td> Pupil Plane Mask
 <tr><td> PSD      <td> Power Spectral Density
 <tr><td> PSFR     <td> Point Spread Function Reconstructor
 <tr><td> PWFS     <td> Pyramid Wavefront Sensor
 <tr><td> PWM      <td> Pulse Width Modulation
+<tr><td> RIO	    <td> Remote I/O
 <tr><td> RPG      <td> Reconstructor Parameter Generator
 <tr><td> RTS      <td> Real-time Telemetry Storage
 <tr><td> SS       <td> Source Simulator 
