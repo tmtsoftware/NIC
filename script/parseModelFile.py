@@ -23,7 +23,7 @@ def getVal(dir,name):
     val = dir[name]
   return val
 
-## parse an enum and build enum list string
+## parse an enum and build enum list string separated by '|'
 def getEnumStr(enum):
   str = ''
   for k in range(0, len(enum)):
@@ -39,12 +39,18 @@ def getDtStr(elem):
   rangeStr = ''
   enumRange = ''
   minMaxRange = ''
+
+  # check if type
   if 'type' in elem:
     type = elem['type']
+    
+    # check if array
     if type == 'array':
       dim = getVal(elem,'dimensions')
       subType = ''
       enum = ''
+      
+      # check for iteam
       if 'items' in elem:
         item = elem['items']
         if 'type' in item:
@@ -52,24 +58,32 @@ def getDtStr(elem):
         elif 'enum' in item:
           enum = item['enum']
        
+      # write array type and array dimension 
       dt = "{0}{1}".format(subType,dim)
           
       if enum != '':
         enumRange = getEnumStr(enum)
+   
+    # if not array then write the type
     else:
       dt = "{0}".format(type)
+
+  # if not type then check if enum 
   elif 'enum' in elem:
     dt = "enum"
     enumRange = getEnumStr(elem['enum'])
   
+  # get min/max range
   minMaxRange = getRangeStr(elem)
 
+  ## write min/max and enum range
   if minMaxRange != '' and enumRange != '':
     rangeStr = "{0} ({1})".format(enumRange,minMaxRange)
   elif minMaxRange != '':
     rangeStr = minMaxRange
   elif enumRange != '':
     rangeStr = enumRange
+  
   return dt, rangeStr
 
 
@@ -108,7 +122,7 @@ def getRateStr(elem):
 
   return str
 
-## 
+## get subsystem string and rate 
 def getSubTableStr(tel):
   subsystem = getVal(tel,'subsystem')
   component = getVal(tel,'component')
@@ -125,7 +139,7 @@ def getSubTableStr(tel):
   return item, rate
 
 
-##
+## write component section
 def writeComp(compDir, outDir):
   file = open(outDir+"/component.sec", 'w')
 
@@ -147,7 +161,7 @@ def writeComp(compDir, outDir):
 
   return prefix, title
 
-##
+## write published telemetry section
 def writePubTelem(compDir, outDir, prefix, title):
   file = open(outDir+"/publishTelem.sec", 'w')
 
@@ -201,7 +215,7 @@ def writePubTelem(compDir, outDir, prefix, title):
 
   file.close()
 
-##
+## write published event section 
 def writePubEvent(compDir, outDir, prefix, title):
   file = open(outDir+"/publishEvent.sec", 'w')
 
@@ -254,7 +268,7 @@ def writePubEvent(compDir, outDir, prefix, title):
   file.close()
 
 
-##
+## write published alarms section
 def writeAlarm(compDir, outDir, prefix, title):
   file = open(outDir+"/alarm.sec", 'w')
 
@@ -285,7 +299,7 @@ def writeAlarm(compDir, outDir, prefix, title):
   file.close()
 
 
-##
+## write subscribed telemetry section
 def writeSubTelem(compDir, outDir, title):
   file = open(outDir+"/subscribeTelem.sec", 'w')
 
@@ -318,7 +332,7 @@ def writeSubTelem(compDir, outDir, title):
 
   file.close()
 
-##
+## write subscribed event section
 def writeSubEvent(compDir, outDir, title):
   file = open(outDir+"/subscribeEvent.sec", 'w')
 
@@ -352,7 +366,7 @@ def writeSubEvent(compDir, outDir, title):
   file.close()
 
 
-##
+## write commands section
 def writeCmd(compDir, outDir, prefix, title):
   file = open(outDir+"/command.sec", 'w')
 
