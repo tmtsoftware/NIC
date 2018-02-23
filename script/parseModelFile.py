@@ -395,7 +395,18 @@ def writeCmd(compDir, outDir, prefix, title):
       name = getVal(rec[i],'name')
 
       file.write("<hr>\n")
+
+##  Added functionality to allow linking to command subsections.
+##  In the doxygen file, add the following to lines to link to a command foo.
+##  \latexonly \hyperref[foo]{foo}\endlatexonly
+##  \htmlonly<a href="#foo">foo</a>\endhtmlonly
+##
+##  Linking only works within the document that included the command.sec file.
+##
+##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
+      file.write("\latexonly\n\label{"+latexStr(name)+"}\n\endlatexonly\n")
+      file.write("\htmlonly<a id="+latexStr(name)+"></a>\endhtmlonly\n")
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
 
