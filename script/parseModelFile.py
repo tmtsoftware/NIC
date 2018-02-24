@@ -405,8 +405,8 @@ def writeCmd(compDir, outDir, prefix, title):
 ##
 ##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      file.write("\latexonly\n\label{"+latexStr(name)+"}\n\endlatexonly\n")
-      file.write("\htmlonly<a id="+latexStr(name)+"></a>\endhtmlonly\n")
+##      file.write("\latexonly\n\label{"+latexStr(name)+"}\n\endlatexonly\n")
+##      file.write("\htmlonly<a id="+latexStr(name)+"></a>\endhtmlonly\n")
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
 
