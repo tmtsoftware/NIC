@@ -1,3 +1,9 @@
-This document explains the <<COMP_NAME>> Assembly and how it integrates into the overall NFIRAOS and telescope software system. It will provide a high-level view of the <<COMP_NAME>> functionality and explain the software interface provided for the control and monitor of the <<COMP_NAME>> Assembly.  
+This document explains the <<COMP_NAME>> Assembly and how it integrates into
+the overall NFIRAOS and telescope software system. It will provide a high-level
+view of the <<COMP_NAME>> functionality and explain the software interface
+provided for the control and monitor of the <<COMP_NAME>> Assembly.  
 
-This document will detail the design and interface of the assembly focusing on the control, state monitoring, and status indicators. This document does not include low-level details of the HCD that will directly interface with <<COMP_NAME>> hardware.
+This document will detail the design and interface of the assembly focusing on
+the control, state monitoring, and status indicators. This document does not
+include low-level details of the HCD that will directly interface with
+<<COMP_NAME>> hardware.
