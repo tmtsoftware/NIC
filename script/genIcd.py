@@ -63,7 +63,7 @@ for type in types:
 for root, dirs, files in os.walk(in_dir):
     # skip hidden
     files = [f for f in files if not f[0] == '.']
-    dirs[:] = [d for d in dirs if not d[0] == '.']
+    dirs[:] = [d for d in sorted(dirs) if not d[0] == '.']
 
     # Parse different types of input files
     for type in types:
