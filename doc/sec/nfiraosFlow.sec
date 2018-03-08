@@ -10,7 +10,7 @@ telemetry, and command responses.
 The AOSQ interfaces with the <<COMP_NAME>> Assembly to control the underlying
 hardware. The assembly will determine if the hardware is in a state capable of
 performing the demand, and accept or reject the command accordingly. During
-command execution the assembly communicate with its HCD and pass the
+command execution the assembly communicates with its HCD and passes the
 corresponding commands down. The assembly and HCD will maintain communication
 until the underlying hardware completes its tasks. The <<COMP_NAME>> Assembly
 then reports the result of of the task completion to the AOSQ.
