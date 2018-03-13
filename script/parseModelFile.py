@@ -16,6 +16,12 @@ def latexStr(str):
   str_sanitized = str.replace('_','\_')
   return str_sanitized
 
+## Sanitize a string so that it can be used as a target label
+def targetStr(str):
+  # Underscores need to be removed.
+  str_sanitized = str.replace('_','')
+  return str_sanitized
+
 ## get a value from the directory, if not present then an empty string is returned
 def getVal(dir,name):
   val = ''
@@ -387,7 +393,8 @@ def writeCmd(compDir, outDir, prefix, title):
 
   for i in range(0, len(rec)):
       name = getVal(rec[i],'name')
-      file.write("\\item "+latexStr(name)+"\n")
+      file.write("\\item ")
+      file.write("\hyperref[" + targetStr(name) + "]{" + latexStr(name) + "}\n")
 
   file.write("\\end{itemize} \endlatexonly\n")
 
@@ -405,9 +412,8 @@ def writeCmd(compDir, outDir, prefix, title):
 ##
 ##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      if name == latexStr(name):
-          file.write("\latexonly\n\label{"+latexStr(name)+"}\n\endlatexonly\n")
-          file.write("\htmlonly<a id="+latexStr(name)+"></a>\endhtmlonly\n")
+      file.write("\latexonly\n\label{"+targetStr(name)+"}\n\endlatexonly\n")
+      file.write("\htmlonly<a id="+targetStr(name)+"></a>\endhtmlonly\n")
 
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
