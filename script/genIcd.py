@@ -14,13 +14,13 @@ from pyhocon import ConfigFactory
 ## main
 #
 
-if (len(sys.argv) < 4) or (len(sys.argv) > 5):
+if (len(sys.argv) < 4):
     print """genIcd: Generate command-model.conf that sends all commands, and subscribe-model.conf that subscribes to all events, for assemblies under the input model path.
 
 usage:
-    genIcd <input model path> <output command-model file> <output subscribe-model file> [skip description string]
+    genIcd <input model path> <output command-model file> <output subscribe-model file> [skip description string 1] [skip description string 2] ...
 
-Note that the optional [skip description string] is a case-insensitve pattern match to the first line of the description for commands and events. Also, this string is going into a regex, so be careful to escape special characters
+Note that the optional [skip description string] arguments are case-insensitve pattern matches to the first line of the description for commands and events. Also, these strings are going into a regex, so be careful to escape special characters. The command/event will be skipped if *any* of the skip strings are matched.
 
 example:
 The following would send all NFIRAOS commands, and subscribe to all NFIRAOS events, with the exception of any commands/events with (engineering) appearing in the first line
@@ -33,10 +33,10 @@ in_dir = sys.argv[1]
 cmd_name = sys.argv[2]
 sub_name = sys.argv[3]
 
-if len(sys.argv) == 5:
-    skipstr = sys.argv[4]
+if len(sys.argv) >= 5:
+    skipstrings = sys.argv[4:]
 else:
-    skipstr = None
+    skipstrings = None
 
 # use a dictionary to keep track of differences between parsing
 # commands and events
@@ -97,9 +97,15 @@ for root, dirs, files in os.walk(in_dir):
                 outfile.write('\n%s// %s %s\n' % (spc,subsystem,component))
                 for r in a:
                     name = r['name']
-                    if skipstr and 'description' in r:
-                        if re.search("\A.*"+skipstr,r['description'],
-                                     re.IGNORECASE):
+                    if skipstrings and 'description' in r:
+                        # Check for skip strings in 1st line of description
+                        skip = False
+                        for skipstr in skipstrings:
+                            if re.search("\A.*"+skipstr,r['description'],
+                                         re.IGNORECASE):
+                                skip = True
+                                break
+                        if skip:
                             print type, subsystem, component, name, \
                                 '[***SKIPPED***]'
                             continue
