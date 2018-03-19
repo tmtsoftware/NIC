@@ -4,5 +4,5 @@ This document is intended for:
 <ol type="a">
 <li> System engineers to understand if the <<COMP_NAME>> software properly incorporates the necessary functionality to control the <<COMP_NAME>> and meet the system's overall needs.
 <li> Assembly developers to understand how to interact with the <<COMP_NAME>> HCD by submitting commands and monitoring telemetry and progress.
-<li> Engineering screen developers to determine what information is published by the <<COMP_NAME>> HCD and what commands are supported.
+<li> Engineering UI developers to determine what information is published by the <<COMP_NAME>> HCD and what commands are supported.
 </ol>
