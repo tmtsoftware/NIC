@@ -1,0 +1,8 @@
+This document shall explain the design of the <<COMP_NAME>> HCD and its relationship to the overall NFIRAOS system with respect to hardware/software interactions. It will demonstrate how other components will interact with the <<COMP_NAME>> HCD to control the <<COMP_NAME>>. It will describe the actions, supported commands, telemetry, operational behavior, and provide information related to controlling the <<COMP_NAME>>.
+
+This document is intended for:
+<ol type="a">
+<li> System engineers to understand if the <<COMP_NAME>> software properly incorporates the necessary functionality to control the <<COMP_NAME>> and meet the system's overall needs.
+<li> Assembly developers to understand how to interact with the <<COMP_NAME>> HCD by submitting commands and monitoring telemetry and progress.
+<li> Engineering screen developers to determine what information is published by the <<COMP_NAME>> HCD and what commands are supported.
+</ol>
