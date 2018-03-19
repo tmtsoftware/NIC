@@ -5,7 +5,7 @@ telescope image aberrations over a 2 arc-minute field of view in the near
 infrared. It performs wavefront correction using two deformable mirrors
 conjugated to 0km (DM0) and 11.8km (DM11). DM0 is mounted on a tip/tilt stage
 (TTS). Pixels are received from up to 6 Laser Guide Star wavefront sensors
-(LGS WFS) (Shack-Hartmann), one high-order Natural Guide Star pyramid wavefront
+(LGS WFS) (Shack-Hartmann), one high-order Natural Guide Star (NGS) pyramid wavefront
 sensor (PWFS), up to three Shack-Hartmann wavefront sensors (OIWFS) that are
 located in the science instruments, and up to 4 on-detector guide windows
 (ODGW) from the science imager. These inputs are processed by the NFIRAOS
