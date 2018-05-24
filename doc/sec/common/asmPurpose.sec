@@ -1,4 +1,4 @@
-This document shall explain the design of the <<COMP_NAME>> Assembly and its relationship to the overall NFIRAOS system with respect to hardware/software interactions. It will demonstrate how other components will interact with the <<COMP_NAME>> Assembly to control the <<COMP_NAME>>. It will describe the actions, supported commands, telemetry, operational behavior, and provide information related to controlling the <<COMP_NAME>>.
+This document shall explain the design of the <<COMP_NAME>> Assembly and its relationship to the overall <<SUBSYSTEM>> system with respect to hardware/software interactions. It will demonstrate how other components will interact with the <<COMP_NAME>> Assembly to control the <<COMP_NAME>>. It will describe the actions, supported commands, telemetry, operational behavior, and provide information related to controlling the <<COMP_NAME>>.
 
 This document is intended for:
 <ol type="a">

@@ -1,5 +1,5 @@
 This document explains the <<COMP_NAME>> HCD and how it integrates into
-the overall NFIRAOS and telescope software system. It will provide a high-level
+the overall <<SUBSYSTEM>> and telescope software system. It will provide a high-level
 view of the <<COMP_NAME>> functionality and explain the software interface
 provided for the control and monitor of the <<COMP_NAME>> HCD.  
 

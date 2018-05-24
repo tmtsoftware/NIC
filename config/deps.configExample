@@ -11,18 +11,22 @@ ifndef DOXYGEN
 DOXYGEN = doxygen
 endif
 
-# assumes PATTERN and ICDDB are siblings of NFIROAS
+# assumes PATTERN and ICDDB are siblings of NFIRAOS / IRIS
 
 ifndef ROOT_PATH
 ROOT_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../../../
 endif
 
 ifndef PATTERN_PATH
-PATTERN_PATH = ${ROOT_PATH}/designPatterns
+PATTERN_PATH = ${ROOT_PATH}/NIC
 endif
 
-ifndef ICDDB_NF
-ICDDB_NF = ${ROOT_PATH}/ICD-Model-Files/NFIRAOS-Model-Files 
+ifndef SUBSYSTEM
+SUBSYSTEM = IRIS
+endif
+
+ifndef ICDDB
+ICDDB = ${ROOT_PATH}/ICD-Model-Files/${SUBSYSTEM}-Model-Files 
 endif
 
 ####################

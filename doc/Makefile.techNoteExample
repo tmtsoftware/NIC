@@ -6,19 +6,31 @@ include ../../../util/config/deps.config
 
 COMP = component
 COMP_NAME = component-name
+COMP_DIR = ${COMP}
 TITLE = "Component Title"
 DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
 
 all:
-	# copy required latex file to local dir
+	# create directories
+	mkdir -p ./pic
+	mkdir -p ./latex
+	mkdir -p ./sec
+        # copy required latex file to local dir
 	cp ${PATTERN_PATH}/doc/latex/* ./latex 
 	# copy common section files (.sec)
-	cp ${PATTERN_PATH}/doc/sec/* ./sec
-	# update asmPurpose section file
+	cp ${PATTERN_PATH}/doc/sec/common/* ./sec
+	cp ${PATTERN_PATH}/doc/sec/${SUBSYSTEM}/* ./sec
+	# update section files
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmPurpose.sec
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/asmScope.sec
+	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' ./sec/flow.sec
+	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' ./sec/asmBaseClass.sec
+	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' ./sec/asmPurpose.sec
+	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' ./sec/asmScope.sec
+	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' ./sec/hcdPurpose.sec
+	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' ./sec/hcdScope.sec
 	# parse model file
-	${PATTERN_PATH}/script/parseModelFile.py ${ICDDB_NF} ${COMP} ./sec
+	${PATTERN_PATH}/script/parseModelFile.py ${ICDDB} ${COMPDIR} ./sec
 	# get template doxygen config file
 	cp ${PATTERN_PATH}/doc/template.doxconf ${COMP}.doxconf
 	# update doxygen config template 

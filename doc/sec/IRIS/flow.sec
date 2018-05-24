@@ -1,0 +1,28 @@
+The IRIS Instrument Sequencer (IS) controls most of IRIS from a
+high-level operational perspective. It understands actions IRIS
+requires and coordinates those operations into commands for individual
+IRIS components. The communication between the IS and the underlying
+IRIS hardware is facilitated through the IRIS software assemblies
+using TMT Common Software (CSW). The assemblies are sent instructions
+to monitor and control the various components of IRIS and they report
+back the progress, events, telemetry, and command responses.
+
+The IS interfaces with the <<COMP_NAME>> Assembly to control the underlying
+hardware. The assembly will determine if the hardware is in a state capable of
+performing the demand, and accept or reject the command accordingly. During
+command execution the assembly communicates with its HCD and passes the
+corresponding commands down. The assembly and HCD will maintain communication
+until the underlying hardware completes its tasks. The <<COMP_NAME>> Assembly
+then reports the result of of the task completion to the IS.
+
+When the IS sends a <i>simple</i> command to the assembly, the assembly will
+first validate the command. If the command is invalid a "rejected" response
+is returned to the IS. Otherwise the command is valid and the assembly
+proceeds to execute the command. Once the execution is complete the assembly
+will return the completion status of the command.
+
+If a <i>discrete</i> command is sent to the assembly, the assembly will first
+validate the command. If the command is invalid a "rejected" response is
+returned to the IS. Otherwise the command is valid and the assembly sends
+an accepted response. The command is then executed, and once complete,
+the assembly will return the completion status of the command.
