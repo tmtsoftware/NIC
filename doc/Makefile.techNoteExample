@@ -10,9 +10,12 @@ COMP_DIR = ${COMP}
 TITLE = "Component Title"
 DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
 
-all:
+# List of dia source files and the png outputs
+DIA_SRC_FILES = $(wildcard pic/*.dia)
+DIA_PNG_FILES = $(subst .dia,.png,${DIA_SRC_FILES})
+
+all: pics
 	# create directories
-	mkdir -p ./pic
 	mkdir -p ./latex
 	mkdir -p ./sec
         # copy required latex file to local dir
@@ -46,6 +49,13 @@ all:
 	#evince ./${COMP}-techNote_${DATE}.pdf &
 	#firefox ./html/index.html &
 
+# how to make any generated content for the pic/ directory
+pics: ${DIA_PNG_FILES}
+
+# renders any dia input files
+pic/%.png: pic/%.dia
+	dia --size=2000x --export=$@ $<
+
 clean:
 	/bin/rm -f ./html/*
 	/bin/rm -f ./latex/*
@@ -53,4 +63,5 @@ clean:
 	/bin/rm -f ./${COMP}.doxconf
 	/bin/rm -f ./${COMP}-techNote_*.pdf
 	/bin/rm -f ./doxygen.errLog
+	/bin/rm -f ${DIA_PNG_FILES}
 
