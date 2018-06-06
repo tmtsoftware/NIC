@@ -14,6 +14,11 @@ DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
 DIA_SRC_FILES = $(wildcard pic/*.dia)
 DIA_PNG_FILES = $(subst .dia,.png,${DIA_SRC_FILES})
 
+# List of LibreOffice source files, intermediate svg files, and png outputs
+LIBRE_SRC_FILES = $(wildcard pic/*.odg)
+LIBRE_SVG_FILES = $(subst .odg,.svg,${LIBRE_SRC_FILES})
+LIBRE_PNG_FILES = $(subst .odg,.png,${LIBRE_SRC_FILES})
+
 all: pics
 	# create directories
 	mkdir -p ./latex
@@ -50,11 +55,16 @@ all: pics
 	#firefox ./html/index.html &
 
 # how to make any generated content for the pic/ directory
-pics: ${DIA_PNG_FILES}
+pics: ${DIA_PNG_FILES} ${LIBRE_PNG_FILES}
 
 # renders any dia input files
 pic/%.png: pic/%.dia
 	dia --size=2000x --export=$@ $<
+
+# renders any LibreOffice .odg files (via svg)
+pic/%.png: pic/%.odg
+	libreoffice --convert-to svg $< --outdir pic/ --headless
+	convert -density 600 $(basename $<).svg $@
 
 clean:
 	/bin/rm -f ./html/*
@@ -64,4 +74,6 @@ clean:
 	/bin/rm -f ./${COMP}-techNote_*.pdf
 	/bin/rm -f ./doxygen.errLog
 	/bin/rm -f ${DIA_PNG_FILES}
+        /bin/rm -f ${LIBRE_SVG_FILES}
+	/bin/rm -f ${LIBRE_PNG_FILES}
 
