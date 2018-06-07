@@ -64,7 +64,7 @@ pic/%.png: pic/%.dia
 # renders any LibreOffice .odg files (via svg)
 pic/%.png: pic/%.odg
 	libreoffice --convert-to svg $< --outdir pic/ --headless
-	convert -density 600 $(basename $<).svg $@
+	convert -density 150 $(basename $<).svg $@
 
 clean:
 	/bin/rm -f ./html/*
