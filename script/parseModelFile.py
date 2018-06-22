@@ -10,6 +10,9 @@ from pyhocon import ConfigFactory
 # subsystem pub/sub prefixes
 sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
 
+# The encoding to generate .sec files.
+DOXYGEN_DOC_ENCODING='utf-8'
+
 ## Sanitize a string so that it displays correctly with latex
 def latexStr(str):
   # Underscores need to be escaped.
@@ -27,7 +30,11 @@ def getVal(dir,name):
   val = ''
   if name in dir: 
     val = dir[name]
-  return val
+    
+  if isinstance(val, unicode):
+    return val.encode(DOXYGEN_DOC_ENCODING)
+  else:
+    return val
 
 ## parse an enum and build enum list string separated by '|'
 def getEnumStr(enum):
