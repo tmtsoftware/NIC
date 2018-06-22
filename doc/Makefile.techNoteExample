@@ -14,9 +14,9 @@ DOC_NUM = "TMT.TBD.TBD.TBD.TBD"
 DIA_SRC_FILES = $(wildcard pic/*.dia)
 DIA_PNG_FILES = $(subst .dia,.png,${DIA_SRC_FILES})
 
-# List of LibreOffice source files, intermediate svg files, and png outputs
+# List of LibreOffice source files, intermediate pdf files, and png outputs
 LIBRE_SRC_FILES = $(wildcard pic/*.odg)
-LIBRE_SVG_FILES = $(subst .odg,.svg,${LIBRE_SRC_FILES})
+LIBRE_PDF_FILES = $(subst .odg,.pdf,${LIBRE_SRC_FILES})
 LIBRE_PNG_FILES = $(subst .odg,.png,${LIBRE_SRC_FILES})
 
 all: pics
@@ -61,10 +61,10 @@ pics: ${DIA_PNG_FILES} ${LIBRE_PNG_FILES}
 pic/%.png: pic/%.dia
 	dia --size=2000x --export=$@ $<
 
-# renders any LibreOffice .odg files (via svg)
+# renders any LibreOffice .odg files (via pdf)
 pic/%.png: pic/%.odg
-	libreoffice --convert-to svg $< --outdir pic/ --headless
-	convert -density 150 $(basename $<).svg $@
+	libreoffice --convert-to pdf $< --outdir pic/ --headless
+	convert -trim -density 150 $(basename $<).pdf $@
 
 clean:
 	/bin/rm -f ./html/*
@@ -74,6 +74,6 @@ clean:
 	/bin/rm -f ./${COMP}-techNote_*.pdf
 	/bin/rm -f ./doxygen.errLog
 	/bin/rm -f ${DIA_PNG_FILES}
-        /bin/rm -f ${LIBRE_SVG_FILES}
+        /bin/rm -f ${LIBRE_PDF_FILES}
 	/bin/rm -f ${LIBRE_PNG_FILES}
 
