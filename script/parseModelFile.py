@@ -6,7 +6,6 @@ import sys
 import re
 import fnmatch
 from pyhocon import ConfigFactory
-import markdown2
 
 # subsystem pub/sub prefixes
 sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
@@ -36,11 +35,6 @@ def getVal(dir,name):
     return val.encode(DOXYGEN_DOC_ENCODING)
   else:
     return val
-
-## get the description from the directory, parse it as markdown and
-## convert it to HTML
-def getDescription(dir):
-  return markdown2.markdown(getVal(dir, 'description')).encode(DOXYGEN_DOC_ENCODING)
 
 ## parse an enum and build enum list string separated by '|'
 def getEnumStr(enum):
@@ -174,7 +168,7 @@ def writeComp(compDir, outDir):
   prefix = getVal(conf,'prefix')
 
   file.write("The prefix for the {0} is: <em>{1}</em>\n\n".format(title,prefix))
-  file.write("{0}<br>\n".format(getDescription(conf)))
+  file.write("{0}<br>\n".format(getVal(conf,'description')))
   
   file.close()
 
@@ -216,7 +210,7 @@ def writePubTelem(compDir, outDir, prefix, title):
       if str != '':
         file.write(str)
 
-      file.write("{0}<br>\n\n".format(getDescription(tel[i])))
+      file.write("{0}<br>\n\n".format(getVal(tel[i],'description')))
 
       if 'attributes' in tel[i]:
         file.write("<table>\n<tr><th> Attribute <th> Data Type <th> Units <th> Range <th> Description\n")
@@ -227,7 +221,7 @@ def writePubTelem(compDir, outDir, prefix, title):
           file.write("<td> "+dateType)
           file.write("<td> "+getVal(attr[j],'units'))
           file.write("<td> "+rangeStr)
-          file.write("<td> "+getDescription(attr[j]))
+          file.write("<td> "+getVal(attr[j],'description'))
         file.write("\n</table>\n\n")
   else:
     file.write("N/A<br>\n")
@@ -268,7 +262,7 @@ def writePubEvent(compDir, outDir, prefix, title):
       if str != '':
         file.write(str)
 
-      file.write("{0}<br>\n\n".format(getDescription(tel[i])))
+      file.write("{0}<br>\n\n".format(getVal(tel[i],'description')))
 
       if 'attributes' in tel[i]:
         file.write("<table>\n<tr><th> Attribute <th> Data Type <th> Units <th> Range <th> Description\n")
@@ -279,7 +273,7 @@ def writePubEvent(compDir, outDir, prefix, title):
           file.write("<td> "+dateType)
           file.write("<td> "+getVal(attr[j],'units'))
           file.write("<td> "+rangeStr)
-          file.write("<td> "+getDescription(attr[j]))
+          file.write("<td> "+getVal(attr[j],'description'))
         file.write("\n</table>\n\n")
   else:
     file.write("N/A<br>\n")
@@ -312,7 +306,7 @@ def writeAlarm(compDir, outDir, prefix, title):
       file.write("<tr><td> {0}.{1} ".format(prefix,getVal(alarm[i],'name')))  
       file.write("<td> "+getVal(alarm[i],'severity'))
       file.write("<td> {0}".format(getVal(alarm[i],'archive')))
-      file.write("<td> "+getDescription(alarm[i]))
+      file.write("<td> "+getVal(alarm[i],'description'))
     file.write("\n</table>\n\n")
 
   file.close()
@@ -429,7 +423,7 @@ def writeCmd(compDir, outDir, prefix, title):
       file.write("\htmlonly<a id="+targetStr(name)+"></a>\endhtmlonly\n")
 
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
-      file.write("{0}<br>\n\n".format(getDescription(rec[i])))
+      file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
 
       if 'args' in rec[i]:
         file.write("<table>\n<tr><th> Argument <th> Data Type <th> Units <th> Range <th> Description\n")
@@ -440,7 +434,7 @@ def writeCmd(compDir, outDir, prefix, title):
           file.write("<td> "+dateType)
           file.write("<td> "+getVal(arg[j],'units'))
           file.write("<td> "+rangeStr)
-          file.write("<td> "+getDescription(arg[j]))
+          file.write("<td> "+getVal(arg[j],'description'))
         file.write("\n</table>\n\n")
 
       if 'requiredArgs' in rec[i]:
