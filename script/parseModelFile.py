@@ -183,7 +183,7 @@ def writePubTelem(compDir, outDir, prefix, title):
     file.write("N/A<br>\n")
     file.close()
     return
-  print(filename)
+
   sys.stdout.flush()
   conf = ConfigFactory.parse_file(filename)
 
