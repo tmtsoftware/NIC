@@ -124,7 +124,7 @@ def getRateStr(elem):
     if maxRate == minRate:
       str = "{0}".format(maxRate)
     else:
-      str = "{0} to {1}".format(maxRate,minRate)
+      str = "{0} to {1}".format(minRate,maxRate)
   elif 'maxRate' in elem:
     str = "&le; {0}".format(elem['maxRate']) 
   elif 'minRate' in elem:
