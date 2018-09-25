@@ -23,7 +23,7 @@ all: pics
 	# create directories
 	mkdir -p ./latex
 	mkdir -p ./sec
-        # copy required latex file to local dir
+	# copy required latex file to local dir
 	cp ${PATTERN_PATH}/doc/latex/* ./latex 
 	# copy common section files (.sec)
 	cp ${PATTERN_PATH}/doc/sec/common/* ./sec
@@ -74,6 +74,6 @@ clean:
 	/bin/rm -f ./${COMP}-techNote_*.pdf
 	/bin/rm -f ./doxygen.errLog
 	/bin/rm -f ${DIA_PNG_FILES}
-        /bin/rm -f ${LIBRE_PDF_FILES}
+	/bin/rm -f ${LIBRE_PDF_FILES}
 	/bin/rm -f ${LIBRE_PNG_FILES}
 
