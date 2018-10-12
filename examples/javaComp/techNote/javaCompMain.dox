@@ -1,0 +1,91 @@
+/*!
+*******************************************************************************************
+\page Introduction 
+\tableofcontents
+
+**********************************************
+\section javaComp_main_intro Introduction
+
+\includedoc overview.sec 
+
+**********************************************
+\section javaComp_main_proviso Proviso
+
+TODO
+
+**********************************************
+\section javaComp_main_purp Purpose
+\includedoc asmPurpose.sec
+
+**********************************************
+\section javaComp_main_scope Scope
+\includedoc asmScope.sec
+
+**********************************************
+\section javaComp_main_ad Applicable Documents
+
+\anchor AD1 [AD1] - TODO
+
+**********************************************
+\section javaComp_main_rd Reference Documents
+
+\anchor RD1 [RD1] - TODO
+
+**********************************************
+\section javaComp_main_change Change Record
+
+<table>
+<tr><th> Revision <th> Date           <th> Section  <th> Modifications
+<tr><td> TODO     <td> TODO           <td> All      <td> TODO: Initial draft
+</table>
+
+**********************************************
+\section javaComp_main_abb Abbreviations
+\includedoc abbreviation.sec
+
+*******************************************************************************************
+\page javaComp_arch System Architecture
+\tableofcontents
+
+**********************************************
+\section javaComp_arch_context Context
+
+TODO
+
+**********************************************
+\section javaComp_arch_flow Flow Description
+
+\includedoc flow.sec 
+
+TODO
+
+**********************************************
+\section javaComp_arch_req Requirements 
+
+TODO
+
+**********************************************
+\section javaComp_arch_hard Hardware Configuration
+
+TODO
+
+*******************************************************************************************
+\page javaComp_design Software Design
+\tableofcontents
+
+**********************************************
+\section javaComp_design_gen General Design
+
+TODO
+
+**********************************************
+\section javaComp_design_config Configuration
+
+TODO
+
+*******************************************************************************************
+\page javaComp_issues Open Issues
+
+TODO
+
+*/

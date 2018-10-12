@@ -1,0 +1,91 @@
+/*!
+*******************************************************************************************
+\page Introduction 
+\tableofcontents
+
+**********************************************
+\section cComp_main_intro Introduction
+
+\includedoc overview.sec 
+
+**********************************************
+\section cComp_main_proviso Proviso
+
+TODO
+
+**********************************************
+\section cComp_main_purp Purpose
+\includedoc asmPurpose.sec
+
+**********************************************
+\section cComp_main_scope Scope
+\includedoc asmScope.sec
+
+**********************************************
+\section cComp_main_ad Applicable Documents
+
+\anchor AD1 [AD1] - TODO
+
+**********************************************
+\section cComp_main_rd Reference Documents
+
+\anchor RD1 [RD1] - TODO
+
+**********************************************
+\section cComp_main_change Change Record
+
+<table>
+<tr><th> Revision <th> Date           <th> Section  <th> Modifications
+<tr><td> TODO     <td> TODO           <td> All      <td> TODO: Initial draft
+</table>
+
+**********************************************
+\section cComp_main_abb Abbreviations
+\includedoc abbreviation.sec
+
+*******************************************************************************************
+\page cComp_arch System Architecture
+\tableofcontents
+
+**********************************************
+\section cComp_arch_context Context
+
+TODO
+
+**********************************************
+\section cComp_arch_flow Flow Description
+
+\includedoc flow.sec 
+
+TODO
+
+**********************************************
+\section cComp_arch_req Requirements 
+
+TODO
+
+**********************************************
+\section cComp_arch_hard Hardware Configuration
+
+TODO
+
+*******************************************************************************************
+\page cComp_design Software Design
+\tableofcontents
+
+**********************************************
+\section cComp_design_gen General Design
+
+TODO
+
+**********************************************
+\section cComp_design_config Configuration
+
+TODO
+
+*******************************************************************************************
+\page cComp_issues Open Issues
+
+TODO
+
+*/

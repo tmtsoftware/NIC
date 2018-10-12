@@ -1,0 +1,57 @@
+/*!
+*******************************************************************************************
+\mainpage Template Top Level Documentation
+\tableofcontents
+
+Some general info.
+
+This manual is divided in the following sections:
+- \subpage template_arch
+- \subpage template_comp
+- \subpage template_techNote
+
+*******************************************************************************************
+\page template_techNote NCC Tech Notes
+
+The following is a list of NCC Tech Notes:
+- <a href="../../../topLevel/techNote/topLevecd l_techNote_current.pdf">Top Level Architecture Tech Note</a> 
+- <a href="../../../cComp/techNote/cComp_techNote_current.pdf">C/C++ Component Tech Note</a> 
+- <a href="../../../javaComp/techNote/javaComp_techNote_current.pdf">Java Component Tech Note</a> 
+
+*******************************************************************************************
+\page template_comp Template Components
+
+The Template has the following Components:
+- \subpage template_cComp
+- \subpage template_javaComp
+
+*******************************************************************************************
+\page template_cComp C/C++ Component
+\tableofcontents
+
+\includedoc cCompIntro.sec
+
+Related Documentation:
+- <a href="../../../cComp/doc/html/index.html">C/C++ Component Implementation Details</a> 
+- <a href="../../../cComp/techNote/cComp_techNote_current.pdf">C/C++ Component Tech Note</a> 
+
+*******************************************************************************************
+\page template_javaComp Java Component
+\tableofcontents
+
+\includedoc javaCompIntro.sec
+
+Related Documentation:
+- <a href="../../../javaComp/doc/html/index.html">Java Component Implementation Details</a> 
+- <a href="../../../javaComp/techNote/javaComp_techNote_current.pdf">Java Component Tech Note</a> 
+
+*******************************************************************************************
+\page template_arch Template Top Level Architecture
+\tableofcontents
+
+TODO architecture intro ...
+
+Related Documentation:
+- <a href="../../../topLevel/techNote/topLevel_techNote_current.pdf">Top Level Architecture Tech Note</a> 
+
+*/
