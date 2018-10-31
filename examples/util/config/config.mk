@@ -23,8 +23,12 @@ ifndef ROOT_PATH
 ROOT_PATH := ${CONFIG_PATH}/../../../../
 endif
 
-ifndef PATTERN_PATH
-PATTERN_PATH := ${ROOT_PATH}/NIC
+ifndef NIC_PATH
+NIC_PATH := ${ROOT_PATH}/NIC
+endif
+
+ifndef TEMPLATE_PATH
+TEMPLATE_PATH := ${NIC_PATH}/template
 endif
 
 ifndef SUBSYSTEM
@@ -48,7 +52,7 @@ DATE := $(shell date +%F)
 # private function for building generalized doxygen webpages
 define make_doxygen_gen
 	$(if ${DOXYGEN},,$(error DOXYGEN not defined))
-	$(if ${PATTERN_PATH},,$(error PATTERN_PATH not defined))
+	$(if ${TEMPLATE_PATH},,$(error TEMPLATE_PATH not defined))
 	$(if ${SUBSYSTEM},,$(errorSUBSYSTEM  not defined))
 	$(if ${COMP_NAME},,$(error COMP_NAME not defined))
 	$(if ${COMP},,$(error COMP not defined))
@@ -61,17 +65,17 @@ define make_doxygen_gen
 	mkdir -p latex
 	mkdir -p tmp
 	# copy required latex file to local dir
-	cp ${PATTERN_PATH}/doc/latex/* latex 
+	cp ${TEMPLATE_PATH}/latex/* latex 
 	# copy common section files (.sec)
-	cp ${PATTERN_PATH}/doc/sec/common/* tmp
-	cp ${PATTERN_PATH}/doc/sec/${SUBSYSTEM}/* tmp
+	cp ${TEMPLATE_PATH}/sec/common/* tmp
+	cp ${TEMPLATE_PATH}/sec/${SUBSYSTEM}/* tmp
 	# update asmPurpose section file
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' tmp/*.sec
 	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' tmp/*.sec
 	# parse model file
-	$(if $1,${PATTERN_PATH}/script/parseModelFile.py $1 ${COMP} tmp,)
+	$(if $1,${TEMPLATE_PATH}/icddb/parseModelFile.py $1 ${COMP} tmp,)
 	# get template doxygen config file
-	cp ${PATTERN_PATH}/doc/template.doxconf tmp/${COMP}.doxconf
+	cp ${TEMPLATE_PATH}/template.doxconf tmp/${COMP}.doxconf
 	# update doxygen config template 
 	sed -i -e '/^PROJECT_NAME *=/c\PROJECT_NAME = ${TITLE}' tmp/${COMP}.doxconf
 	sed -i -e '/^PROJECT_BRIEF *=/c\PROJECT_BRIEF = ${DATE}' tmp/${COMP}.doxconf
