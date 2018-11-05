@@ -85,14 +85,14 @@ public class Interp1d {
     /*-------------------------------------------------------------------------
      * Private Attributes
      *-----------------------------------------------------------------------*/
-    private double[] x_table;    /*!< optional x values corresponding to y values */
-    private double[] y_table;    /*!< values to be interpolated */
+    private double[] x_table; /*!< optional x values corresponding to y values */
+    private double[] y_table; /*!< values to be interpolated */
 
-    private double x0_table; /*!< reference x value for converting into array indices */
-    private double dx_table; /*!< x step size for converting into array indices */
+    private double x0_table;  /*!< reference x value for converting into array indices */
+    private double dx_table;  /*!< x step size for converting into array indices */
 
-    private final boolean yOnly;   /*!< false if constructed only with y-values */
-    private final boolean regular; /*!< flag indicating regularly-spaced data */
+    private boolean yOnly;    /*!< false if constructed only with y-values */
+    private boolean regular;  /*!< flag indicating regularly-spaced data */
 
     /*
      ******************************************************************************
@@ -114,13 +114,17 @@ public class Interp1d {
      ******************************************************************************
      */
     public Interp1d(double[] y) throws IllegalArgumentException {
+        yOnlyConstructor(y);
+    }
+
+    private void yOnlyConstructor(double[] y) throws IllegalArgumentException {
         if (y.length < 2) {
             throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
         }
 
         this.y_table = y;
-        yOnly = true;
-        regular = true;
+        this.yOnly = true;
+        this.regular = true;
     }
 
     /*
@@ -151,7 +155,12 @@ public class Interp1d {
      ******************************************************************************
      */
     public Interp1d(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
-         if (x.length < 2) {
+        xAndYConstructor(x, y, regular);
+    }
+
+
+    public void xAndYConstructor(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
+        if (x.length < 2) {
             throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
         }
         if (y.length < 2) {
@@ -165,7 +174,7 @@ public class Interp1d {
         this.y_table = y;
         this.regular = regular;
 
-        if (regular) {
+        if (this.regular) {
             // used to convert supplied values into array indices
             this.x0_table = x[0];
             this.dx_table = x[1] - x[0];
@@ -180,7 +189,7 @@ public class Interp1d {
                 }
             }
         }
-        yOnly = false;
+        this.yOnly = false;
     }
 
     /*
@@ -208,8 +217,6 @@ public class Interp1d {
      ******************************************************************************
      */
     public Interp1d(String filename, boolean twoColumns, boolean regular) throws IOException, IllegalArgumentException {
-        // Read in Y, or X,Y (if twoColumns set) using space-delimited columns of numbers in a supplied text file
-
         Path file = Paths.get(filename);
         List<String> lines = Files.readAllLines(file, Charset.defaultCharset());
 
@@ -232,31 +239,7 @@ public class Interp1d {
                 y[i] = yList.get(i).doubleValue();
             }
 
-            if (x.length < 2) {
-                throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
-            }
-
-            this.x_table = x;
-            this.y_table = y;
-            this.regular = regular;
-
-            if (regular) {
-                // used to convert supplied values into array indices
-                this.x0_table = x[0];
-                this.dx_table = x[1] - x[0];
-            } else {
-                // verify that x values are monotonic when irregularly spaced
-                for (int i=0; i<(x_table.length-1); ++i) {
-                    double x0 = x_table[i];
-                    double x1 = x_table[i+1];
-
-                    if (x0 > x1) {
-                        throw new ArithmeticException("Detected x array elements out of order: " + x0 + ", " + x1);
-                    }
-                }
-            }
-            yOnly = false;
-
+            xAndYConstructor(x, y, regular);
         } else {
             for (String line : lines) {
                 String[] elements = line.trim().split("\\s+");
@@ -270,13 +253,7 @@ public class Interp1d {
                 y[i] = yList.get(i).doubleValue();;
             }
 
-            if (y.length < 2) {
-                throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
-            }
-
-            this.y_table = y;
-            yOnly = true;
-            this.regular = true;
+            yOnlyConstructor(y);
         }
     }
 
