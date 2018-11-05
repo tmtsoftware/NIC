@@ -9,3 +9,5 @@ Presently the main contents are:
  - generic document sections and LaTex style files for software in `doc/`
 
  - helper scripts in `script/`
+
+ - a java subdirectory containing shared Java classes
