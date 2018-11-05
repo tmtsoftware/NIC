@@ -96,7 +96,8 @@ I also changed it to have a status command, and also made the stop command also 
 ## Environment Variables to set
 Need to set clusterSeeds and interfaceName.  "clusterSeeds" is set to your ip address with a colon and then the port# for the location service, eg: 172.17.15.245:5552.  The "interfaceName" is set to eno1 (depends on what ifconfig shows you).
 
-
+### Error when starting
+Warning, if you happen to download the zip file and try to start up CSW and then you decide to move that directory to a new location - then you will have to likely make some modifications to the configuration files.  It appears to update the configuration file in csw/target/universal/stage/conf/redis_sentinel/sentinel.conf
 
 
 ## Testing
