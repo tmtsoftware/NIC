@@ -9,15 +9,15 @@ import static org.junit.Assert.assertEquals;
 public class Interp1dTest {
     double epsilon = 0.0001;
 
-    Vect v0 = new Vect(new double[]{0.0});
-    Vect v1 = new Vect(new double[]{0.0, 1.0});
-    Vect v2 = new Vect(new double[]{-1.0, 2.0, 3.0, 5.0, 7.0});
-    Vect v3 = new Vect(new double[]{-2.0, 0.0, 2.0, 4.0, 6.0});
-    Vect v4 = new Vect(new double[]{-0.5, 0.0, 2.0, 4.0, 10.0});
-    Vect v5 = new Vect(new double[]{0.0, 2.0, 2.0, 1.0, 5.0});
-    Vect v6 = new Vect(new double[]{0.0, 1.0, 1.0, 2.0, 3.0});
-    Vect v7 = new Vect(new double[]{-1.0, 0.0, 0.5});
-    Vect v8 = new Vect(new double[]{0.0, 1.0, 2.0});
+    double[] v0 = new double[]{0.0};
+    double[] v1 = new double[]{0.0, 1.0};
+    double[] v2 = new double[]{-1.0, 2.0, 3.0, 5.0, 7.0};
+    double[] v3 = new double[]{-2.0, 0.0, 2.0, 4.0, 6.0};
+    double[] v4 = new double[]{-0.5, 0.0, 2.0, 4.0, 10.0};
+    double[] v5 = new double[]{0.0, 2.0, 2.0, 1.0, 5.0};
+    double[] v6 = new double[]{0.0, 1.0, 1.0, 2.0, 3.0};
+    double[] v7 = new double[]{-1.0, 0.0, 0.5};
+    double[] v8 = new double[]{0.0, 1.0, 2.0};
 
     @Test(expected = Interp1dException.class)
     public void constructorTooSmall() throws Interp1dException {
@@ -76,6 +76,8 @@ public class Interp1dTest {
 
     @Test
     public void file() throws IOException, Interp1dException {
+        // Note that the files holding the test data are stored
+        // in test/resources
         ClassLoader classLoader = getClass().getClassLoader();
 
         // irregular

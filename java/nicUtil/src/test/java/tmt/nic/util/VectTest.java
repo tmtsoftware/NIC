@@ -12,12 +12,6 @@ public class VectTest {
     Vect v3 = new Vect(new double[]{-5,6,0});
 
     @Test
-    public void dot() {
-        assertEquals(20, v1.dot(v2), epsilon);
-        assertEquals(20, v2.dot(v1), epsilon);
-    }
-
-    @Test
     public void abs() {
         Vect v = v3.abs();
         Vect expected = new Vect(new double[]{5,6,0});
@@ -26,8 +20,9 @@ public class VectTest {
     }
 
     @Test
-    public void norm() {
-        assertEquals(Math.sqrt(5),v1.norm(), epsilon);
+    public void dot() {
+        assertEquals(20, v1.dot(v2), epsilon);
+        assertEquals(20, v2.dot(v1), epsilon);
     }
 
     @Test
@@ -36,10 +31,13 @@ public class VectTest {
     }
 
     @Test
-    public void times() {
-        Vect v = v1.times(3);
-        Vect expected = new Vect(new double[]{0,3,6});
-        assertTrue(v.equals(expected));
+    public void max() {
+        assertEquals(6,v3.max(),epsilon);
+    }
+
+    @Test
+    public void norm() {
+        assertEquals(Math.sqrt(5),v1.norm(), epsilon);
     }
 
     @Test
@@ -48,4 +46,11 @@ public class VectTest {
         Vect expected = new Vect(new double[]{-2,-1,0});
         assertTrue(v.equals(expected));
     }
+    @Test
+    public void times() {
+        Vect v = v1.times(3);
+        Vect expected = new Vect(new double[]{0,3,6});
+        assertTrue(v.equals(expected));
+    }
+
 }

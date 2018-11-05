@@ -1,3 +1,34 @@
+/******************************************************************************
+ ****         D A O   I N S T R U M E N T A T I O N   G R O U P           *****
+ *
+ * (c) 2018                               (c) 2018
+ * National Research Council              Conseil national de recherches
+ * Ottawa, Canada, K1A 0R6                Ottawa, Canada, K1A 0R6
+ * All rights reserved                    Tous droits reserves
+ *
+ * NRC disclaims any warranties,          Le CNRC denie toute garantie
+ * expressed, implied, or statutory, of   enoncee, implicite ou legale, de
+ * any kind with respect to the soft-     quelque nature que se soit, concer-
+ * ware, including without limitation     nant le logiciel, y compris sans
+ * any warranty of merchantability or     restriction toute garantie de valeur
+ * fitness for a particular purpose.      marchande u de pertinence pour un
+ * NRC shall not be liable in any event   usage particulier. Le CNRC ne pourra
+ * for any damages, whether direct or     en aucun cas etre tenu responsable
+ * indirect, special or general, conse-   de tout dommage, direct ou indirect,
+ * quential or incidental, arising from   particulier ou general, accessoire
+ * the use of the software.               ou fortuit, resultant de l'utili-
+ *                                        sation du logiciel.
+ *
+ *****************************************************************************/
+
+/*!
+ ******************************************************************************
+ * \file Interp1d.java
+ * \brief This file implements a class for performing 1-dimensional interpolation
+ * <hr>
+ ******************************************************************************
+ */
+
 package tmt.nic.util;
 
 import java.io.IOException;
@@ -11,19 +42,79 @@ import java.util.List;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 
+/*
+ ******************************************************************************
+ * Interp1d
+ ******************************************************************************
+ *//*!
+ * \brief
+ * This class is used to perform interpolation (and extrapolation) of
+ * 1-dimensional data.
+ *
+ * <b> Implementation Details: </b>
+ * This class uses either linearly- or irregularly-spaced data to perform
+ * interpolation and extrapolation. The original intended purposes are
+ * to assist in: (i) creation of lookup tables for things like pointing
+ * models, or waveforms in motion simulations; and (ii) to interpolate/
+ * extrapolate precise positions from demand streams (e.g., provided
+ * by the TCS).
+ *
+ * If the constructor is given a single vector, Y, the interpolation
+ * method val() takes a fractional array index as the argument (i.e., val(0.5) would
+ * return the interpolated value between the first and second elements of Y).
+ *
+ * If the constructor is provided with two vectors X and Y, then val() returns
+ * the interpolated value at the requested x-coordinate. For example, if X
+ * were an array of time stamps (seconds), and Y positions at those time stamps,
+ * val(32.3) would return the interpolated Y-value at 32.3 seconds.
+ *
+ * Data may be provided using double[] arrays or a named file containing columns of
+ * values that will be read.
+ *
+ * For data values beyond the extent of X and Y, extrapolation is achieved
+ * using the val() methods, or with wrapping using the valWithWrap() method.
+ *
+ * Presently there is only support for linear interpolation/extrapolation.
+ *
+ * <hr>
+ * \callgraph
+ ******************************************************************************
+ */
 public class Interp1d {
-    private Vect x_table;
-    private Vect y_table;
 
-    private double dx_table;
-    private double x0_table;
+    /*-------------------------------------------------------------------------
+     * Private Attributes
+     *-----------------------------------------------------------------------*/
+    private double[] x_table;    /*!< optional x values corresponding to y values */
+    private double[] y_table;    /*!< values to be interpolated */
 
-    private final boolean yOnly;
-    private final boolean regular;
+    private double x0_table; /*!< reference x value for converting into array indices */
+    private double dx_table; /*!< x step size for converting into array indices */
 
-    public Interp1d(Vect y) throws Interp1dException {
-        // Check that y includes at least two values
-        if (y.d.length < 2) {
+    private final boolean yOnly;   /*!< false if constructed only with y-values */
+    private final boolean regular; /*!< flag indicating regularly-spaced data */
+
+    /*
+     ******************************************************************************
+     * Interp1d::Interp1d()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Interp1d Constructor provided a single array of values.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The caller provides a vector of regularly-spaced values to be interpolated.
+     * Subsequent calls to val() interpret the argument as fractional array indices.
+     *
+     * \param[in] y (double[]) regularly-spaced values
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public Interp1d(double[] y) throws Interp1dException {
+        if (y.length < 2) {
             throw new Interp1dException("Supplied vector must have at least 2 elements");
         }
 
@@ -32,42 +123,90 @@ public class Interp1d {
         regular = true;
     }
 
-    public Interp1d(Vect x, Vect y, boolean regular) throws Interp1dException {
-        // Supply both x and y value.
-        if (x.d.length < 2) {
+    /*
+     ******************************************************************************
+     * Interp1d::Interp1d()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Interp1d Constructor using provided x and y values.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The caller provides a list of y-values to be interpolated, with corresponding
+     * x-values.
+     * Subsequent calls to val() interpret the argument as x values at which to
+     * evaluate the interpolation.
+     * The caller can assert that the x-values are regularly sampled (equally spaced),
+     * which will result in a slight performance improvement (no checking is performed).
+     * Otherwise, irregularly-spaced data may also be provided (setting regular to
+     * false), though it must be sorted in monotonically increasing order of x (checked).
+     *
+     * \param[in] x (double[]) x-coordinates of values to be interpolated
+     * \param[in] y (double[]) y-values to be interpolated
+     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public Interp1d(double[] x, double[] y, boolean regular) throws Interp1dException {
+         if (x.length < 2) {
             throw new Interp1dException("Supplied x vector must have at least 2 elements");
         }
-        if (y.d.length < 2) {
+        if (y.length < 2) {
             throw new Interp1dException("Supplied y vector must have at least 2 elements");
         }
-        if (x.d.length != y.d.length) {
+        if (x.length != y.length) {
             throw new Interp1dException("Supplied x and y vectors must have the same lengths");
         }
 
         this.x_table = x;
         this.y_table = y;
-
-        // Regular if x known to be evenly spaced. Otherwise x need only be sorted
         this.regular = regular;
 
         if (regular) {
             // used to convert supplied values into array indices
-            this.x0_table = x.d[0];
-            this.dx_table = x.d[1] - x.d[0];
+            this.x0_table = x[0];
+            this.dx_table = x[1] - x[0];
         } else {
             // verify that x values are monotonic when irregularly spaced
-            for (int i=0; i<(x_table.d.length-1); ++i) {
-                double x0 = x_table.d[i];
-                double x1 = x_table.d[i+1];
+            for (int i=0; i<(x_table.length-1); ++i) {
+                double x0 = x_table[i];
+                double x1 = x_table[i+1];
 
                 if (x0 > x1) {
-                    throw new Interp1dException("Detected x array elements out of order: " + x0 + ", " + x1);
+                    throw new Interp1dException("Detected x array elements out of order at indices " + x0 + ", " + x1);
                 }
             }
         }
         yOnly = false;
     }
 
+    /*
+     ******************************************************************************
+     * Interp1d::Interp1d()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Interp1d Constructor using values stored in a file.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The caller provides the name of a text file containing one (Y only), or two columns
+     * of numerical data (X and Y separated by whitespace), indicating how many
+     * columns to expect with the twoColumns argument.
+     * The interpretation of the loaded X and Y values and the regular argument are
+     * otherwise identical to Interp1d::Interp1d(double[] x, double[] y, boolean regular).
+     *
+     * \param[in] filename (String) name of the file containing interpolation data
+     * \param[in] twoColumns (boolean) indicate whether file contains just Y (false), or X and Y (true)
+     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public Interp1d(String filename, boolean twoColumns, boolean regular) throws IOException, Interp1dException {
         // Read in Y, or X,Y (if twoColumns set) using space-delimited columns of numbers in a supplied text file
 
@@ -86,14 +225,14 @@ public class Interp1d {
                 }
             }
 
-            Vect x = new Vect(new double[xList.size()]);
-            Vect y = new Vect(new double[yList.size()]);
-            for (int i=0; i<x.d.length; ++i) {
-                x.d[i] = xList.get(i).doubleValue();
-                y.d[i] = yList.get(i).doubleValue();
+            double[] x = new double[xList.size()];
+            double[] y = new double[yList.size()];
+            for (int i=0; i<x.length; ++i) {
+                x[i] = xList.get(i).doubleValue();
+                y[i] = yList.get(i).doubleValue();
             }
 
-            if (x.d.length < 2) {
+            if (x.length < 2) {
                 throw new Interp1dException("Supplied x vector must have at least 2 elements");
             }
 
@@ -103,13 +242,13 @@ public class Interp1d {
 
             if (regular) {
                 // used to convert supplied values into array indices
-                this.x0_table = x.d[0];
-                this.dx_table = x.d[1] - x.d[0];
+                this.x0_table = x[0];
+                this.dx_table = x[1] - x[0];
             } else {
                 // verify that x values are monotonic when irregularly spaced
-                for (int i=0; i<(x_table.d.length-1); ++i) {
-                    double x0 = x_table.d[i];
-                    double x1 = x_table.d[i+1];
+                for (int i=0; i<(x_table.length-1); ++i) {
+                    double x0 = x_table[i];
+                    double x1 = x_table[i+1];
 
                     if (x0 > x1) {
                         throw new Interp1dException("Detected x array elements out of order: " + x0 + ", " + x1);
@@ -126,12 +265,12 @@ public class Interp1d {
                 }
             }
 
-            Vect y = new Vect(new double[yList.size()]);
-            for (int i=0; i<y.d.length; ++i) {
-                y.d[i] = yList.get(i).doubleValue();;
+            double[] y = new double[yList.size()];
+            for (int i=0; i<y.length; ++i) {
+                y[i] = yList.get(i).doubleValue();;
             }
 
-            if (y.d.length < 2) {
+            if (y.length < 2) {
                 throw new Interp1dException("Supplied vector must have at least 2 elements");
             }
 
@@ -141,35 +280,49 @@ public class Interp1d {
         }
     }
 
-    public double mod(double x, double y) {
-        double retval = x % y;
-        if (retval<0) {
-            retval += y;
-        }
-        return retval;
-    }
-
-    public double valWithWrap(double x) throws Interp1dException {
-        // Wrap x to within the range of the interpolation function
-        double x_wrapped;
-        if (yOnly) {
-            x_wrapped = mod(x, getTableLen());
-        } else {
-            double xRange = x_table.d[getTableLen()-1] - x_table.d[0];
-            x_wrapped = mod((x - x_table.d[0]),xRange) + x_table.d[0];
-        }
-        return val(x_wrapped);
-    }
-
+    /*
+     ******************************************************************************
+     * Interp1d::val()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Obtain interpolated/extrapolated value.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * If the object was constructed only with Y values, the argument is interpreted
+     * as a fractional array index into Y (i.e., val(0.5) returns the value interpolated
+     * between the first and second elements of Y).
+     *
+     * If the object was constructed with X and Y values, the argument is interpreted
+     * as the x value at which to obtain an interpolated value. For example, if X
+     * were an array of time stamps (seconds), and Y positions at those time stamps,
+     * val(32.3) would return the interpolated position at 32.3 seconds.
+     *
+     * If the argument lies beyond the range of the input data (array length in the
+     * case of Y only, or the range of X if specified), then the returned value
+     * is the linear extrapolation of the nearest two data points. For example, if
+     * constructed using Y=[0,2], then val(2) is an index past the end of the Y array,
+     * and it would return the extrapolated value 4.
+     *
+     * \param[in] x (double) fractional index or x-value at which to evaluate interpolation
+     *
+     * \return (double) the interpolated/extrapolated value
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public double val(double x) throws Interp1dException {
         // Evaluate interpolation function at x
 
         double retval;
         int i0, i1;     // indices of bounding samples
         double y0, y1;  // y values at bounding samples
-        double i;       // fraction array index
+        double i;       // fractional array index
 
         if (regular) {
+            // If regularly spaced, we are just converting x into
+            // a fractional array index, identify the values of
+            // y on either side, and then performing linear interpolation.
             if (yOnly) {
                 i = x;
             } else {
@@ -179,38 +332,39 @@ public class Interp1d {
             if (i < 1) {
                 i0 = 0;
                 i1 = 1;
-            } else if (i >= (y_table.d.length - 2)) {
-                i0 = y_table.d.length - 2;
-                i1 = y_table.d.length - 1;
+            } else if (i >= (y_table.length - 2)) {
+                i0 = y_table.length - 2;
+                i1 = y_table.length - 1;
             } else {
                 i0 = (int) floor(i);
                 i1 = (int) ceil(i);
             }
 
-            y0 = y_table.d[i0];
-            y1 = y_table.d[i1];
+            y0 = y_table[i0];
+            y1 = y_table[i1];
 
             double m = (y1-y0)/1.;
             double b = y0 - m*i0;
 
             retval = m*i + b;
         } else {
-            // For irregularly-spaced x do a binary search to find the bounding indices to fit line segment
-            i0 = searchXIndex(x, 0, x_table.d.length-1);
+            // For irregularly-spaced x do a binary search to find the
+            // bounding indices to fit line segment.
+            i0 = searchXIndex(x, 0, x_table.length-1);
             i1 = i0+1;
 
-            y0 = y_table.d[i0];
-            y1 = y_table.d[i1];
+            y0 = y_table[i0];
+            y1 = y_table[i1];
 
-            double x0 = x_table.d[i0];
-            double x1 = x_table.d[i1];
+            double x0 = x_table[i0];
+            double x1 = x_table[i1];
 
             if (x0 == x1) {
                 // average if both values are equal
                 retval = (y0+y1)/2.;
             } else {
                 double m = (y1 - y0) / (x1 - x0);
-                double b = y0 - m * x_table.d[i0];
+                double b = y0 - m * x_table[i0];
                 retval = m * x + b;
             }
 
@@ -219,11 +373,105 @@ public class Interp1d {
         return retval;
     }
 
-    public int searchXIndex(double x, int i0, int i1) {
-        // Recursive binary search
+    /*
+     ******************************************************************************
+     * Interp1d::valWithWrap()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Obtain interpolated value with wrapping.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * This method behaves the same as val() when the argument lies within
+     * the range of the input data (array length in the case of Y only, or the range of
+     * X if specified).
+     *
+     * If the argument is outside the range, instead of extrapolating, this method
+     * will return an interpolated value with wrapping. For example, if constructed
+     * using Y=[0,1,2], then valWithWrap(2.5) is an index past the end of the Y array,
+     * and it would return the interpolated value 1.0 which lies between 2 at index 2 and
+     * the wrapped value 0 index 0. Similarly, valWithWrap(3.5) would return 0.5 as
+     * an interpolation between 0 and wrapped index 0, and 1 at wrapped index 1.
+     *
+     * \param[in] x (double) fractional index or x-value at which to evaluate interpolation
+     *
+     * \return (double) the interpolated value
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public double valWithWrap(double x) throws Interp1dException {
+        // Wrap x to within the range of the interpolation function
+        double x_wrapped;
+        if (yOnly) {
+            x_wrapped = mod(x, y_table.length);
+        } else {
+            double xRange = x_table[x_table.length-1] - x_table[0];
+            x_wrapped = mod((x - x_table[0]),xRange) + x_table[0];
+        }
+        return val(x_wrapped);
+    }
+
+
+    /*
+     ******************************************************************************
+     * Interp1d::mod()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Private unsigned implementation of modulo
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Returns x % y, but adds y to the result if it is < 0. This is the operation
+     * we need when identifying wrapped array indices.
+     *
+     * \param[in] x (double) dividend
+     * \param[in] y (double) divisor
+     *
+     * \return (double) the unsigned remainder
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    private double mod(double x, double y) {
+        double retval = x % y;
+        if (retval<0) {
+            retval += y;
+        }
+        return retval;
+    }
+
+    /*
+     ******************************************************************************
+     * Interp1d::searchXIndex()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Recursive private method that performs a binary search of the X array used in the
+     * class constructor to find the lower of two bounding indices for an arbitrary x value.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Given x and two starting indices i0 and i1, compares x to the X array evaluated at
+     * the midpoint xMid = X[iMid], where iMid=(i0+i1)/2.
+     * If continues to search recursively in the top half (searchIndex(x,iMid,i1) if x>xMid,
+     * and the bottom half (searchIndex(x,i0,iMid) otherwise. It stops under the following
+     * conditions:
+     *   - i1-i0 <= 1: found the bounding indices somewhere in the middle of the X table
+     *   - x <= X[i0]: x is beyond the lower bound of X
+     *   - x >= X[i1]: x is beyond the upper bound of X
+     *
+     * For example, if X=[0,1,2,3], then getTableLen(1.2) would return 1 (since the bounding
+     * indices are 1 and 2).
+     *
+     * \return (int) the lower bounding index
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    private int searchXIndex(double x, int i0, int i1) {
         int retval;
-        double x0 = x_table.d[i0];
-        double x1 = x_table.d[i1];
+        double x0 = x_table[i0];
+        double x1 = x_table[i1];
 
         if ((i1-i0) <= 1) {
             retval = i0;
@@ -233,38 +481,14 @@ public class Interp1d {
             retval = i1-1;
         } else {
             int iMid = (i0 + i1)/2;
-            double xMid = x_table.d[iMid];
+            double xMid = x_table[iMid];
             if (x > xMid) {
                 retval = searchXIndex(x,iMid,i1);
             } else {
                 retval = searchXIndex(x, i0, iMid);
             }
         }
-
-
         return retval;
     }
 
-    public double getXTableVal(int index) {
-        return x_table.d[index];
-    }
-
-    public double getYTableVal(int index) {
-        return y_table.d[index];
-    }
-
-    public int getTableLen() {
-        return y_table.d.length;
-    }
-
-    public void offsetXTable(double dx) throws Interp1dException {
-        if (yOnly) {
-            throw new Interp1dException("Interp1d object instantiated with y only.");
-        }
-        x_table = x_table.plus(dx);
-        if (regular) {
-            // Need to re-calculate
-            x0_table = x_table.d[0];
-        }
-    }
 }

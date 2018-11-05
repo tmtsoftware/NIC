@@ -20,7 +20,7 @@ public class HistogramTest {
         assertEquals(1.0,h.getMean(),epsilon);
         assertEquals(0.5,h.getMin(),epsilon);
         assertEquals(1.5,h.getMax(),epsilon);
-        assertEquals(2,h.n);
+        assertEquals(2,h.nHist);
         assertEquals(2,h.nTotal);
         assertEquals(0.5,h.getVariance(),epsilon);
         assertEquals(0.707107,h.getStdev(),epsilon);
@@ -32,15 +32,15 @@ public class HistogramTest {
         assertEquals(0.0,h.getMean(),epsilon);
         assertEquals(-1.5,h.getMin(),epsilon);
         assertEquals(1.5,h.getMax(),epsilon);
-        assertEquals(2,h.n);
+        assertEquals(2,h.nHist);
         assertEquals(4,h.nTotal);
         assertEquals(1.66666,h.getVariance(),epsilon);
         assertEquals(1.29099,h.getStdev(),epsilon);
 
         // String output only contains bins with values
         assertEquals("Min:-1.5 Mean:-2.7755575615628914E-17 Std:1.2909944487358054 Max:1.5 Samples:4\n"+
-                "0.0: 1.0\n1.0: 1.0\n",h.printstr());
-        System.out.println(h.printstr());
+                "0.0: 1.0\n1.0: 1.0\n",h.toString());
+        System.out.println(h.toString());
     }
 
     @Test
@@ -52,12 +52,12 @@ public class HistogramTest {
         assertEquals(5.0,h.getMean(),epsilon);
         assertEquals(1.0,h.getMin(),epsilon);
         assertEquals(9,h.getMax(),epsilon);
-        assertEquals(18,h.n);
+        assertEquals(18,h.nHist);
         assertEquals(18,h.nTotal);
         assertEquals(7.05882,h.getVariance(),epsilon);
         assertEquals(2.65684,h.getStdev(),epsilon);
 
-        System.out.println(h.printstr());
+        System.out.println(h.toString());
     }
 
     @Test(expected = Exception.class)

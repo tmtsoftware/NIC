@@ -1,15 +1,129 @@
+/******************************************************************************
+ ****         D A O   I N S T R U M E N T A T I O N   G R O U P           *****
+ *
+ * (c) 2018                               (c) 2018
+ * National Research Council              Conseil national de recherches
+ * Ottawa, Canada, K1A 0R6                Ottawa, Canada, K1A 0R6
+ * All rights reserved                    Tous droits reserves
+ *
+ * NRC disclaims any warranties,          Le CNRC denie toute garantie
+ * expressed, implied, or statutory, of   enoncee, implicite ou legale, de
+ * any kind with respect to the soft-     quelque nature que se soit, concer-
+ * ware, including without limitation     nant le logiciel, y compris sans
+ * any warranty of merchantability or     restriction toute garantie de valeur
+ * fitness for a particular purpose.      marchande u de pertinence pour un
+ * NRC shall not be liable in any event   usage particulier. Le CNRC ne pourra
+ * for any damages, whether direct or     en aucun cas etre tenu responsable
+ * indirect, special or general, conse-   de tout dommage, direct ou indirect,
+ * quential or incidental, arising from   particulier ou general, accessoire
+ * the use of the software.               ou fortuit, resultant de l'utili-
+ *                                        sation du logiciel.
+ *
+ *****************************************************************************/
+
+/*!
+ ******************************************************************************
+ * \file Vect.java
+ * \brief This file implements a utility class for vectors.
+ * <hr>
+ ******************************************************************************
+ */
+
 package tmt.nic.util;
 
-/**
- * Helper class for doing typical vector operations
+/*
+ ******************************************************************************
+ * Interp1d
+ ******************************************************************************
+ *//*!
+ * \brief
+ * This class is used to implement vectors and some common operations.
+ *
+ * <b> Implementation Details: </b>
+ * Vector data are provided as a double[] to the constructor, and are public
+ * to allow the user to update and read values as they see fit.
+ *
+ * The following basic vector operations are currently supported:
+ *   - abs() to return the element-wise absolute value of a Vector
+ *   - dot() to perform the dot product between two Vectors
+ *   - equals() to check for element-wise equality of two Vectors
+ *   - max() to calculate the maximum value of the vector
+ *   - min() to calculate the minimum value of the vector
+ *   - norm() to calculate the vector norm
+ *   - plus() to perform scalar addition
+ *   - times() to perform scalar multiplication
+ *
+ * <hr>
+ * \callgraph
+ ******************************************************************************
  */
 public class Vect {
-    public double[] d;
+    /*-------------------------------------------------------------------------
+     * Public Attributes
+     *-----------------------------------------------------------------------*/
+    public final double[] d;
 
+    /*
+     ******************************************************************************
+     * Vect::Vect()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Default constructor provided an array of values.
+     *
+     * \param[d] d (double[]) array of data for the Vector.
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public Vect(double[] d) {
         this.d = d;
     }
 
+    /*
+     ******************************************************************************
+     * Vect::abs()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Returns a new Vector of element-wise absolute values.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Creates a new vector in which each element is the absolute value.
+     *
+     * \return (Vect) vector of absolute values
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public Vect abs() {
+        Vect result = new Vect(new double[d.length]);
+        for (int i=0; i<d.length; ++i) {
+            result.d[i] = Math.abs(d[i]);
+        }
+        return result;
+    }
+
+    /*
+     ******************************************************************************
+     * Vect::dot()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Perform the dot product.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Performs the dot product with the supplied vector.
+     *
+     * \param[in] v (Vect) second vector with which to perform the dot product.
+     *
+     * \return (double) the dot product.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public double dot(Vect v) {
         double result=0;
         if (v.d.length != d.length) {
@@ -21,8 +135,25 @@ public class Vect {
         return result;
     }
 
+    /*
+     ******************************************************************************
+     * Vect::equals()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Checks for element-wise equality between two vectors.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Checks for element-wise equality.
+     *
+     * \param[in] v (Vect) second vector with which to to compare.
+     *
+     * \return (boolean) the result of the equality check.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public boolean equals(Vect v) {
-        // Test element-wise vector equality
         boolean result=true;
         if (v.d.length != d.length) {
             throw new IllegalArgumentException("Vectors must have the same length.");
@@ -36,22 +167,47 @@ public class Vect {
         return result;
     }
 
-    public Vect abs() {
-        Vect result = new Vect(new double[d.length]);
-        for (int i=0; i<d.length; ++i) {
-            result.d[i] = Math.abs(d[i]);
+    /*
+     ******************************************************************************
+     * Vect::max()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Vector maximum.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Calculates the maximum value of the vector.
+     *
+     * \return (double) the vector minimum.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public double max() {
+        double result;
+        result = d[0];
+        for (int i=1; i<d.length; ++i) {
+            result = Math.max(result,d[i]);
         }
         return result;
     }
 
-    public double norm() {
-        double sum=0;
-        for (int i=0; i<d.length; ++i) {
-            sum += d[i]*d[i];
-        }
-        return Math.sqrt(sum);
-    }
-
+    /*
+     ******************************************************************************
+     * Vect::min()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Vector minimum.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Calculates the minimum value of the vector.
+     *
+     * \return (double) the vector minimum.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public double min() {
         double result;
         result = d[0];
@@ -61,8 +217,75 @@ public class Vect {
         return result;
     }
 
+    /*
+     ******************************************************************************
+     * Vect::norm()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Vector norm.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Calculates the sqrt of the sum of the squared values.
+     *
+     * \return (double) the vector norm.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public double norm() {
+        double sum=0;
+        for (int i=0; i<d.length; ++i) {
+            sum += d[i]*d[i];
+        }
+        return Math.sqrt(sum);
+    }
+
+    /*
+     ******************************************************************************
+     * Vect::plus()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Scalar addition.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Creates a new vector in which each element has a added to it.
+     *
+     * \param[in] a (double) scalar value to add
+     *
+     * \return (Vect) vector of added values.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public Vect plus(double a) {
+        Vect result = new Vect(new double[d.length]);
+        for (int i=0; i<d.length; ++i) {
+            result.d[i] = d[i]+a;
+        }
+        return result;
+    }
+
+    /*
+     ******************************************************************************
+     * Vect::times()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Scalar multiplication.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * Creates a new vector in which each element is multiplied by a.
+     *
+     * \param[in] a (double) scalar multiplier
+     *
+     * \return (Vect) vector of multiplied values.
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     public Vect times(double a) {
-        // Scalar multiplication
         Vect result = new Vect(new double[d.length]);
         for (int i=0; i<d.length; ++i) {
             result.d[i] = a*d[i];
@@ -70,13 +293,5 @@ public class Vect {
         return result;
     }
 
-    public Vect plus(double a) {
-        // Scalar addition
-        Vect result = new Vect(new double[d.length]);
-        for (int i=0; i<d.length; ++i) {
-            result.d[i] = d[i]+a;
-        }
-        return result;
-    }
 
 }
