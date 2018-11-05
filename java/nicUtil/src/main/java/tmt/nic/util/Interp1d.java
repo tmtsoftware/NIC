@@ -113,9 +113,9 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public Interp1d(double[] y) throws Interp1dException {
+    public Interp1d(double[] y) throws IllegalArgumentException {
         if (y.length < 2) {
-            throw new Interp1dException("Supplied vector must have at least 2 elements");
+            throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
         }
 
         this.y_table = y;
@@ -150,15 +150,15 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public Interp1d(double[] x, double[] y, boolean regular) throws Interp1dException {
+    public Interp1d(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
          if (x.length < 2) {
-            throw new Interp1dException("Supplied x vector must have at least 2 elements");
+            throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
         }
         if (y.length < 2) {
-            throw new Interp1dException("Supplied y vector must have at least 2 elements");
+            throw new IllegalArgumentException("Supplied y vector must have at least 2 elements");
         }
         if (x.length != y.length) {
-            throw new Interp1dException("Supplied x and y vectors must have the same lengths");
+            throw new IllegalArgumentException("Supplied x and y vectors must have the same lengths");
         }
 
         this.x_table = x;
@@ -176,7 +176,7 @@ public class Interp1d {
                 double x1 = x_table[i+1];
 
                 if (x0 > x1) {
-                    throw new Interp1dException("Detected x array elements out of order at indices " + x0 + ", " + x1);
+                    throw new ArithmeticException("Detected x array elements out of order at indices " + x0 + ", " + x1);
                 }
             }
         }
@@ -207,7 +207,7 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public Interp1d(String filename, boolean twoColumns, boolean regular) throws IOException, Interp1dException {
+    public Interp1d(String filename, boolean twoColumns, boolean regular) throws IOException, IllegalArgumentException {
         // Read in Y, or X,Y (if twoColumns set) using space-delimited columns of numbers in a supplied text file
 
         Path file = Paths.get(filename);
@@ -233,7 +233,7 @@ public class Interp1d {
             }
 
             if (x.length < 2) {
-                throw new Interp1dException("Supplied x vector must have at least 2 elements");
+                throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
             }
 
             this.x_table = x;
@@ -251,7 +251,7 @@ public class Interp1d {
                     double x1 = x_table[i+1];
 
                     if (x0 > x1) {
-                        throw new Interp1dException("Detected x array elements out of order: " + x0 + ", " + x1);
+                        throw new ArithmeticException("Detected x array elements out of order: " + x0 + ", " + x1);
                     }
                 }
             }
@@ -271,7 +271,7 @@ public class Interp1d {
             }
 
             if (y.length < 2) {
-                throw new Interp1dException("Supplied vector must have at least 2 elements");
+                throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
             }
 
             this.y_table = y;
@@ -311,7 +311,7 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public double val(double x) throws Interp1dException {
+    public double val(double x) {
         // Evaluate interpolation function at x
 
         double retval;
@@ -400,7 +400,7 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public double valWithWrap(double x) throws Interp1dException {
+    public double valWithWrap(double x) {
         // Wrap x to within the range of the interpolation function
         double x_wrapped;
         if (yOnly) {

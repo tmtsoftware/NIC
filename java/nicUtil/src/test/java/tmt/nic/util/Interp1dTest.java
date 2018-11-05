@@ -19,27 +19,27 @@ public class Interp1dTest {
     double[] v7 = new double[]{-1.0, 0.0, 0.5};
     double[] v8 = new double[]{0.0, 1.0, 2.0};
 
-    @Test(expected = Interp1dException.class)
-    public void constructorTooSmall() throws Interp1dException {
+    @Test(expected = IllegalArgumentException.class)
+    public void constructorTooSmall() throws IllegalArgumentException {
         // Should throw exception because v0 doesn't have 2 elements
         Interp1d t0 = new Interp1d(v0);
     }
 
-    @Test(expected = Interp1dException.class)
-    public void constructorVectMismatch() throws Interp1dException {
+    @Test(expected = IllegalArgumentException.class)
+    public void constructorVectMismatch() throws IllegalArgumentException {
         // Should throw exception because number of elements don't match
         Interp1d t0 = new Interp1d(v0, v2, true);
     }
 
-    @Test(expected = Interp1dException.class)
-    public void invalidXOrder() throws Interp1dException {
+    @Test(expected = ArithmeticException.class)
+    public void invalidXOrder() throws ArithmeticException {
         // Should throw exception because X values out of order
         Interp1d t0 = new Interp1d(v5, v2, false);
         System.out.println("Shouldn't see this: " + t0.val(3.0));
     }
 
     @Test
-    public void val() throws Interp1dException {
+    public void val() {
         // y only, 2-element array
         Interp1d t1 = new Interp1d(v1);
         assertEquals(0, t1.val(0), epsilon);
@@ -75,7 +75,7 @@ public class Interp1dTest {
     }
 
     @Test
-    public void file() throws IOException, Interp1dException {
+    public void file() throws IOException {
         // Note that the files holding the test data are stored
         // in test/resources
         ClassLoader classLoader = getClass().getClassLoader();
@@ -97,7 +97,7 @@ public class Interp1dTest {
     }
 
     @Test
-    public void valWithWrap() throws Interp1dException {
+    public void valWithWrap() {
         // y only
         Interp1d t2 = new Interp1d(v2);
         assertEquals(-1, t2.valWithWrap(0), epsilon);
