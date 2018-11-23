@@ -249,9 +249,9 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public double getMin() throws Exception {
+    public double getMin() throws ArithmeticException {
         if (nTotal == 0) {
-            throw new Exception("No values added to histogram.");
+            throw new ArithmeticException("No values have been added.");
         }
         return min;
     }
@@ -274,9 +274,9 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public double getMax() throws Exception {
+    public double getMax() throws ArithmeticException {
         if (nTotal == 0) {
-            throw new Exception("No values added to histogram.");
+            throw new ArithmeticException("No values have been added.");
         }
         return max;
     }
@@ -299,9 +299,9 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public double getMean() throws Exception {
+    public double getMean() throws ArithmeticException {
         if (nTotal == 0) {
-            throw new Exception("No values added to histogram.");
+            throw new ArithmeticException("No values have been added.");
         }
         return mu;
     }
@@ -329,9 +329,9 @@ public class Histogram {
      * \callgraph
      * ******************************************************************************
      */
-    public double getVariance() throws Exception {
+    public double getVariance() throws ArithmeticException {
         if (nTotal < 2) {
-            throw new Exception("Unable to calculate variance with < 2 samples.");
+            throw new ArithmeticException("Unable to calculate variance with < 2 samples.");
         }
         return m2 / (nTotal-1);
     }
@@ -359,7 +359,7 @@ public class Histogram {
      * \callgraph
      * ******************************************************************************
      */
-    public double getStdev() throws Exception {
+    public double getStdev() {
         return sqrt(getVariance());
     }
 
@@ -392,8 +392,8 @@ public class Histogram {
             }
 
             retVal = sb.toString();
-        } catch (Exception E) {
-            retVal = "No stats available.";
+        } catch (ArithmeticException e) {
+            retVal = "Stats unavailable due to: "+e;
         }
         return retVal;
     }

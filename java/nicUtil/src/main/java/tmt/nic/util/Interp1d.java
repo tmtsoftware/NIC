@@ -430,7 +430,7 @@ public class Interp1d {
      * <b> Implementation Details: </b>\n\n
      * Given x and two starting indices i0 and i1, compares x to the X array evaluated at
      * the midpoint xMid = X[iMid], where iMid=(i0+i1)/2.
-     * If continues to search recursively in the top half (searchIndex(x,iMid,i1) if x>xMid,
+     * It continues to search recursively in the top half (searchIndex(x,iMid,i1) if x>xMid,
      * and the bottom half (searchIndex(x,i0,iMid) otherwise. It stops under the following
      * conditions:
      *   - i1-i0 <= 1: found the bounding indices somewhere in the middle of the X table
