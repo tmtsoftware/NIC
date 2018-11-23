@@ -61,17 +61,17 @@ define make_doxygen_gen
 	mkdir -p latex
 	mkdir -p tmp
 	# copy required latex file to local dir
-	cp ${PATTERN_PATH}/doc/latex/* latex 
+	cp ${PATTERN_PATH}/template/latex/* latex 
 	# copy common section files (.sec)
-	cp ${PATTERN_PATH}/doc/sec/common/* tmp
-	cp ${PATTERN_PATH}/doc/sec/${SUBSYSTEM}/* tmp
+	cp ${PATTERN_PATH}/template/sec/common/* tmp
+	cp ${PATTERN_PATH}/template/sec/${SUBSYSTEM}/* tmp
 	# update asmPurpose section file
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' tmp/*.sec
 	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' tmp/*.sec
 	# parse model file
-	$(if $1,${PATTERN_PATH}/script/parseModelFile.py $1 ${COMP} tmp,)
+	$(if $1,${PATTERN_PATH}/template/icddb/parseModelFile.py $1 ${COMP} tmp,)
 	# get template doxygen config file
-	cp ${PATTERN_PATH}/doc/template.doxconf tmp/${COMP}.doxconf
+	cp ${PATTERN_PATH}/template/template.doxconf tmp/${COMP}.doxconf
 	# update doxygen config template 
 	sed -i -e '/^PROJECT_NAME *=/c\PROJECT_NAME = ${TITLE}' tmp/${COMP}.doxconf
 	sed -i -e '/^PROJECT_BRIEF *=/c\PROJECT_BRIEF = ${DATE}' tmp/${COMP}.doxconf
