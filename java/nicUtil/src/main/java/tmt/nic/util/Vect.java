@@ -31,6 +31,8 @@
 
 package tmt.nic.util;
 
+import java.util.Optional;
+
 /*
  ******************************************************************************
  * Interp1d
@@ -62,6 +64,18 @@ public class Vect {
      * Public Attributes
      *-----------------------------------------------------------------------*/
     public final double[] d;
+
+    /*-------------------------------------------------------------------------
+     * Private Attributes
+     *-----------------------------------------------------------------------*/
+
+    // Since d is final it is safe to store the result of operations that
+    // depend only on d on the first invocation, and then simply return these
+    // stored values on subsequent invocations.
+    private Optional<Vect> abs = Optional.empty();
+    private Optional<Double> max = Optional.empty();
+    private Optional<Double> min = Optional.empty();
+    private Optional<Double> norm = Optional.empty();
 
     /*
      ******************************************************************************
@@ -99,11 +113,16 @@ public class Vect {
      ******************************************************************************
      */
     public Vect abs() {
-        Vect result = new Vect(new double[d.length]);
-        for (int i=0; i<d.length; ++i) {
-            result.d[i] = Math.abs(d[i]);
+        if (abs.isPresent()) {
+            return abs.get();
+        } else {
+            Vect result = new Vect(new double[d.length]);
+            for (int i = 0; i < d.length; ++i) {
+                result.d[i] = Math.abs(d[i]);
+            }
+            abs = Optional.of(result);
+            return result;
         }
-        return result;
     }
 
     /*
@@ -144,7 +163,9 @@ public class Vect {
      * Checks for element-wise equality between two vectors.
      *
      * <b> Implementation Details: </b>\n\n
-     * Checks for element-wise equality.
+     * Checks for element-wise equality. It is optimized to return true
+     * without checking element-wise equality if the comparison vector is
+     * in fact the same object.
      *
      * \param[in] v (Vect) second vector with which to to compare.
      *
@@ -155,13 +176,19 @@ public class Vect {
      */
     public boolean equals(Vect v) {
         boolean result=true;
-        if (v.d.length != d.length) {
-            throw new IllegalArgumentException("Vectors must have the same length.");
-        }
-        for (int i=0; i<d.length; ++i) {
-            if (d[i] != v.d[i]) {
-                result = false;
-                break;
+        if (this == v) {
+            // same object so we can skip the element-wise test
+            result = true;
+        } else {
+            if (v.d.length != d.length) {
+                throw new IllegalArgumentException("Vectors must have the same length.");
+            }
+            // Check element-wise equality
+            for (int i = 0; i < d.length; ++i) {
+                if (d[i] != v.d[i]) {
+                    result = false;
+                    break;
+                }
             }
         }
         return result;
@@ -184,12 +211,16 @@ public class Vect {
      ******************************************************************************
      */
     public double max() {
-        double result;
-        result = d[0];
-        for (int i=1; i<d.length; ++i) {
-            result = Math.max(result,d[i]);
+        if (max.isPresent()) {
+            return max.get();
+        } else {
+            double result = d[0];
+            for (int i = 1; i < d.length; ++i) {
+                result = Math.max(result, d[i]);
+            }
+            max = Optional.of(result);
+            return result;
         }
-        return result;
     }
 
     /*
@@ -209,12 +240,16 @@ public class Vect {
      ******************************************************************************
      */
     public double min() {
-        double result;
-        result = d[0];
-        for (int i=1; i<d.length; ++i) {
-            result = Math.min(result,d[i]);
+        if (min.isPresent()) {
+            return min.get();
+        } else {
+            double result = d[0];
+            for (int i = 1; i < d.length; ++i) {
+                result = Math.min(result, d[i]);
+            }
+            min = Optional.of(result);
+            return result;
         }
-        return result;
     }
 
     /*
@@ -234,11 +269,17 @@ public class Vect {
      ******************************************************************************
      */
     public double norm() {
-        double sum=0;
-        for (int i=0; i<d.length; ++i) {
-            sum += d[i]*d[i];
+        if (norm.isPresent()) {
+            return norm.get();
+        } else {
+            double sum = 0;
+            for (int i = 0; i < d.length; ++i) {
+                sum += d[i] * d[i];
+            }
+            double result = Math.sqrt(sum);
+            norm = Optional.of(result);
+            return result;
         }
-        return Math.sqrt(sum);
     }
 
     /*
