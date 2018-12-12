@@ -2,7 +2,7 @@
 name := "nicUtil"
 
 // orgnization name (e.g., the package name of the project)
-organization := "tmt.nic.util"
+organization := "nic.util"
 
 version := "0.1"
 
