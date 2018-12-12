@@ -159,7 +159,7 @@ public class Interp1d {
     }
 
 
-    public void xAndYConstructor(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
+    private void xAndYConstructor(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
         if (x.length < 2) {
             throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
         }
