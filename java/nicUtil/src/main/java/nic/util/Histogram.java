@@ -48,7 +48,7 @@ import static java.lang.Math.*;
  * Methods are provided to measure statistical properties of
  * the data.
  * The histogram size need not match the full extent of the data;
- * the min, mean, and max are calculated correctly even when data fall outside
+ * the min, mean, max etc. are calculated correctly even when data fall outside
  * the bounds (they are simply not added to the histogram).
  *
  * <hr>
@@ -287,7 +287,7 @@ public class Histogram {
      ******************************************************************************
      *//*!
      * \brief
-     * Return the mean value of previously accumulated data.
+     * Return the mean value, \f$\mu\f$, of previously accumulated data.
      *
      * <b> Implementation Details: </b>\n\n
      * The mean is calculated as the mean of all data entered using the
@@ -316,9 +316,11 @@ public class Histogram {
      *
      * <b> Implementation Details: </b>\n\n
      * This method calculates the unbiased sample variance:
-     *     1/(n-1) * sum_i (x_i - mu)**2
-     * where n is the number of data points, x_i are the data accumulated using
-     * update(), and mu is the mean of the data.
+     * \f[
+     *     \sigma^2 = \frac{1}{n-1} \sum_i (x_i - \mu)^2
+     * \f]
+     * where \f$n\f$ is the number of data points, \f$x_i\f$ are the data accumulated using
+     * update(), and \f$\mu\f$ is the mean of the data.
      *
      * The variance is calculated using all data entered with the
      * update() method (after the warmup period), regardless of whether it lies
@@ -345,10 +347,12 @@ public class Histogram {
      * Return the corrected sample standard deviation
      *
      * <b> Implementation Details: </b>\n\n
-     * This method calculates the corrected sample standard deviation
-     *     sqrt( 1/(n-1) * sum_i (x_i - mu)**2 )
-     * where n is the number of data points, x_i are the data accumulated using
-     * update(), and mu is the mean of the daya.
+     * This method calculates the corrected sample standard deviation:
+     * \f[
+     *     \sigma = \sqrt{ \frac{1}{n-1} \sum_i (x_i - \mu)^2 }
+     * \f]
+     * where \f$n\f$ is the number of data points, \f$x_i\f$ are the data accumulated using
+     * update(), and \f$\mu\f$ is the mean of the data.
      *
      * The standard deviation is calculated using all data entered with the
      * update() method (after the warmup period), regardless of whether it lies
