@@ -29,7 +29,7 @@
  ******************************************************************************
  */
 
-package tmt.nic.util;
+package nic.util;
 
 import static java.lang.Math.*;
 
@@ -67,19 +67,19 @@ public class Histogram {
     public final double binMax; /*!< upper bound of Histogram */
     public final double binStep;/*!< Histogram bin sizes */
     public final int len;       /*!< number of bins in the Histogram */
-    public long nHist;          /*!< number of values in histogram */
-    public long nTotal;         /*!< total number of values, including outside of histogram */
-    private long nUpdate;       /*!< number of times update() called (compared to warmup) */
-    public final long warmup;   /*!< ignore the first warmup samples in calls to update() */
 
     /*-------------------------------------------------------------------------
      * Private Attributes
      *-----------------------------------------------------------------------*/
 
-    private double mu;  /*!< current calculation of the mean */
-    private double m2;  /*!< running sum of squared deviation, used for variance calc */
-    private double min; /*!< current minimum data value */
-    private double max; /*!< current maximum data value */
+    private final long warmup; /*!< ignore the first warmup samples in calls to update() */
+    private long nHist;        /*!< number of values in histogram */
+    private long nTotal;       /*!< total number of values, including those outside of the histogram */
+    private long nUpdate;      /*!< number of times update() called (compared to warmup) */
+    private double mu;         /*!< current calculation of the mean */
+    private double m2;         /*!< running sum of squared deviation, used for variance calc */
+    private double min;        /*!< current minimum data value */
+    private double max;        /*!< current maximum data value */
 
     /*
      ******************************************************************************
@@ -396,5 +396,17 @@ public class Histogram {
             retVal = "Stats unavailable due to: "+e;
         }
         return retVal;
+    }
+
+    // --- Simpler Getters  ----------------------------------------------------------------------------------------
+
+    /*! @copydoc nHist */
+    public long getnHist() {
+        return nHist;
+    }
+
+    /*! @copydoc nTotal */
+    public long getnTotal() {
+        return nTotal;
     }
 }

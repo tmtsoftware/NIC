@@ -1,4 +1,4 @@
-package tmt.nic.util;
+package nic.util;
 
 import org.junit.Test;
 

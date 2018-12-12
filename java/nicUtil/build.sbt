@@ -17,6 +17,7 @@ enablePlugins(JavaAppPackaging)
 
 // library dependencies. (organization name) % (project name) % (version)
 libraryDependencies ++= Seq(
+  "junit" % "junit" % "4.12",
   "com.novocode" % "junit-interface" % "0.11" % "test"
 )
 

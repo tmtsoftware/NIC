@@ -1,4 +1,4 @@
-package tmt.nic.util;
+package nic.util;
 
 import org.junit.Test;
 
@@ -20,8 +20,8 @@ public class HistogramTest {
         assertEquals(1.0,h.getMean(),epsilon);
         assertEquals(0.5,h.getMin(),epsilon);
         assertEquals(1.5,h.getMax(),epsilon);
-        assertEquals(2,h.nHist);
-        assertEquals(2,h.nTotal);
+        assertEquals(2,h.getnHist());
+        assertEquals(2,h.getnTotal());
         assertEquals(0.5,h.getVariance(),epsilon);
         assertEquals(0.707107,h.getStdev(),epsilon);
 
@@ -32,8 +32,8 @@ public class HistogramTest {
         assertEquals(0.0,h.getMean(),epsilon);
         assertEquals(-1.5,h.getMin(),epsilon);
         assertEquals(1.5,h.getMax(),epsilon);
-        assertEquals(2,h.nHist);
-        assertEquals(4,h.nTotal);
+        assertEquals(2,h.getnHist());
+        assertEquals(4,h.getnTotal());
         assertEquals(1.66666,h.getVariance(),epsilon);
         assertEquals(1.29099,h.getStdev(),epsilon);
 
@@ -52,8 +52,8 @@ public class HistogramTest {
         assertEquals(5.0,h.getMean(),epsilon);
         assertEquals(1.0,h.getMin(),epsilon);
         assertEquals(9,h.getMax(),epsilon);
-        assertEquals(18,h.nHist);
-        assertEquals(18,h.nTotal);
+        assertEquals(18,h.getnHist());
+        assertEquals(18,h.getnTotal());
         assertEquals(7.05882,h.getVariance(),epsilon);
         assertEquals(2.65684,h.getStdev(),epsilon);
 

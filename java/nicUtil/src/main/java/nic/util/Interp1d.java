@@ -29,7 +29,7 @@
  ******************************************************************************
  */
 
-package tmt.nic.util;
+package nic.util;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
