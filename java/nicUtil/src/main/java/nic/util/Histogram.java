@@ -1,7 +1,7 @@
 /******************************************************************************
  ****         D A O   I N S T R U M E N T A T I O N   G R O U P           *****
  *
- * (c) 2018                               (c) 2018
+ * (c) 2018-2019                          (c) 2018-2019
  * National Research Council              Conseil national de recherches
  * Ottawa, Canada, K1A 0R6                Ottawa, Canada, K1A 0R6
  * All rights reserved                    Tous droits reserves
@@ -298,7 +298,7 @@ public class Histogram {
 
     /*
      ******************************************************************************
-     * Histogram::getIMax()
+     * Histogram::getiMax()
      ******************************************************************************
      *//*!
      * \brief
@@ -313,7 +313,7 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public long getIMax() throws ArithmeticException {
+    public long getiMax() throws ArithmeticException {
         if (nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
@@ -322,7 +322,7 @@ public class Histogram {
 
     /*
      ******************************************************************************
-     * Histogram::getTMax()
+     * Histogram::gettMax()
      ******************************************************************************
      *//*!
      * \brief
@@ -335,7 +335,7 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public Instant getTMax() throws ArithmeticException {
+    public Instant gettMax() throws ArithmeticException {
         if (nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
