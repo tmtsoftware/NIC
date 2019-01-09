@@ -31,6 +31,8 @@
 
 package nic.util;
 
+import java.time.Instant;
+import java.util.Optional;
 import static java.lang.Math.*;
 
 /*
@@ -62,11 +64,15 @@ public class Histogram {
      * Public Attributes
      *---------------------------------------------------------------------------*/
 
-    public final double d[];    /*!< fixed-size double array to hold the histogram */
+    /** \brief Delimeter for printed histograms. Ensure consistency with DAO_STATS_HIST_DELIM in daoLib */
+    public static final String HIST_DELIM = "[][][][][][][][][][][][][][][][][][][][][][][][][][][][]";
+
+    public final long d[];       /*!< fixed-size long array to hold the histogram */
     public final double binMin; /*!< lower bound of Histogram */
     public final double binMax; /*!< upper bound of Histogram */
     public final double binStep;/*!< Histogram bin sizes */
     public final int len;       /*!< number of bins in the Histogram */
+    public final Optional<String> label; /*!< Label for this histogram */
 
     /*-------------------------------------------------------------------------
      * Private Attributes
@@ -80,6 +86,8 @@ public class Histogram {
     private double m2;         /*!< running sum of squared deviation, used for variance calc */
     private double min;        /*!< current minimum data value */
     private double max;        /*!< current maximum data value */
+    private long iMax;         /*!< call # to update() at which maximum occurred */
+    private Instant tMax;      /*!< time at which the maximum occurred */
 
     /*
      ******************************************************************************
@@ -101,20 +109,22 @@ public class Histogram {
      * \param[in] binMax (double) upper bound of the Histogram
      * \param[in] binStep (double) Histogram bin size
      * \param[in] warmup (long) how many samples to ignore until accumulation begins
+     * \param[in] label (Optional<String>) Optional label for the Histogram.
      *
      * \return N/A
      *
      * \callgraph
      ******************************************************************************
      */
-    public Histogram(double binMin, double binMax, double binStep, long warmup) {
+    public Histogram(double binMin, double binMax, double binStep, long warmup, Optional<String> label) {
         // Allocate histogram with bins of size binStep between binMin and binMax
         this.binMin = binMin;
         this.binMax = binMax;
         this.binStep = binStep;
         this.warmup = warmup;
+        this.label = label;
         len = (int) ceil((binMax-binMin)/binStep);
-        d = new double[len];
+        d = new long[len];
         nHist = 0;
         nTotal = 0;
         mu = 0;
@@ -136,14 +146,15 @@ public class Histogram {
      * \param[in] binMin (double) lower bound of the Histogram
      * \param[in] binMax (double) upper bound of the Histogram
      * \param[in] binStep (double) Histogram bin size
+     * \param[in] label (Optional<String>) Optional label for the Histogram.
      *
      * \return N/A
      *
      * \callgraph
      ******************************************************************************
      */
-    public Histogram(double binMin, double binMax, double binStep) {
-        this(binMin, binMax, binStep, 0);
+    public Histogram(double binMin, double binMax, double binStep, Optional<String> label) {
+        this(binMin, binMax, binStep, 0, label);
     }
 
     /*
@@ -209,9 +220,13 @@ public class Histogram {
         if (nTotal == 0) {
             min = x;
             max = x;
+            iMax = nUpdate;
+            tMax = Instant.now();
         } else {
             if (x > max) {
                 max = x;
+                iMax = nUpdate;
+                tMax = Instant.now();
             }
             if (x < min) {
                 min = x;
@@ -279,6 +294,52 @@ public class Histogram {
             throw new ArithmeticException("No values have been added.");
         }
         return max;
+    }
+
+    /*
+     ******************************************************************************
+     * Histogram::getIMax()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Return the index at which the maximum occurred.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The return value is the number of times update() was called including warmup
+     * at which the maximum occured.
+     *
+     * \return (long) the index
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public long getIMax() throws ArithmeticException {
+        if (nTotal == 0) {
+            throw new ArithmeticException("No values have been added.");
+        }
+        return iMax;
+    }
+
+    /*
+     ******************************************************************************
+     * Histogram::getTMax()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Return the time at which the maximum occurred.
+     *
+     * <b> Implementation Details: </b>\n\n
+     *
+     * \return (Instant) the time
+     *
+     * \callgraph
+     ******************************************************************************
+     */
+    public Instant getTMax() throws ArithmeticException {
+        if (nTotal == 0) {
+            throw new ArithmeticException("No values have been added.");
+        }
+        return tMax;
     }
 
     /*
@@ -376,6 +437,7 @@ public class Histogram {
      * String representation of the Histogram, including basic statistics.
      *
      * <b> Implementation Details: </b>\n\n
+     * The format of the string should match daoStats_printHistogram().
      *
      * \return (String) string representation
      *
@@ -388,12 +450,23 @@ public class Histogram {
         try {
             StringBuffer sb = new StringBuffer();
 
-            sb.append("Min:" + getMin() + " Mean:" + getMean() + " Std:" + getStdev() + " Max:" + getMax() + " Samples:" + nTotal + "\n");
+            sb.append(Histogram.HIST_DELIM);
+
+            this.label.ifPresent(l->{
+               sb.append("\n\n"+l+"\n\n");
+            });
+
+            sb.append("Min: " + getMin() + " Mean: " + getMean() + " SD: " + getStdev() + "\n" +
+                    "Max: " + getMax() + " @ " + tMax + " (sample " + iMax + ")\n");
+
+            sb.append("Histogram (bin label represents lower bound)\n");
+
             for (int i = 0; i < len; ++i) {
                 if (d[i] != 0) {
                     sb.append((binMin + i * binStep) + ": " + d[i] + "\n");
                 }
             }
+
 
             retVal = sb.toString();
         } catch (ArithmeticException e) {
