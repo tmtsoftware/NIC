@@ -1,4 +1,4 @@
-# tmt.nic.util
+# nic.util
 
 This is a Java package with common utility classes.
 
