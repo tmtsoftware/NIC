@@ -143,7 +143,7 @@ public class Vect {
      * \callgraph
      ******************************************************************************
      */
-    public double dot(Vect v) {
+    public double dot(Vect v) throws IllegalArgumentException {
         double result=0;
         if (v.d.length != d.length) {
             throw new IllegalArgumentException("Vectors must have the same length.");
@@ -174,7 +174,7 @@ public class Vect {
      * \callgraph
      ******************************************************************************
      */
-    public boolean equals(Vect v) {
+    public boolean equals(Vect v) throws IllegalArgumentException {
         boolean result=true;
         if (this == v) {
             // same object so we can skip the element-wise test
