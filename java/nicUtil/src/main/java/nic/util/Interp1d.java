@@ -185,7 +185,7 @@ public class Interp1d {
                 double x1 = _x_table[i+1];
 
                 if (x0 > x1) {
-                    throw new ArithmeticException("Detected x array elements out of order at indices " + x0 + ", " + x1);
+                    throw new ArithmeticException("Detected x array elements out of order at indices " + i + ", " + (i+1));
                 }
             }
         }
