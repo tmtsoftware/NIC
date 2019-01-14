@@ -32,6 +32,7 @@
 package nic.util;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Optional;
 import static java.lang.Math.*;
 
@@ -51,7 +52,9 @@ import static java.lang.Math.*;
  * the data.
  * The histogram size need not match the full extent of the data;
  * the min, mean, max etc. are calculated correctly even when data fall outside
- * the bounds (they are simply not added to the histogram).
+ * the bounds (compare getnTotal(), getMin(), and getMax() to getnHist(),
+ * gethistLowBound(), and gethistUpBound(), respectively, to get a sense of
+ * how the range of the histogram compares to the input data).
  *
  * <hr>
  * \callgraph
@@ -67,27 +70,29 @@ public class Histogram {
     /** \brief Delimeter for printed histograms. Ensure consistency with DAO_STATS_HIST_DELIM in daoLib */
     public static final String HIST_DELIM = "[][][][][][][][][][][][][][][][][][][][][][][][][][][][]";
 
-    public final long d[];       /*!< fixed-size long array to hold the histogram */
-    public final double binMin; /*!< lower bound of Histogram */
-    public final double binMax; /*!< upper bound of Histogram */
-    public final double binStep;/*!< Histogram bin sizes */
-    public final int len;       /*!< number of bins in the Histogram */
-    public final Optional<String> label; /*!< Label for this histogram */
-
     /*-------------------------------------------------------------------------
      * Private Attributes
      *-----------------------------------------------------------------------*/
 
-    private final long warmup; /*!< ignore the first warmup samples in calls to update() */
-    private long nHist;        /*!< number of values in histogram */
-    private long nTotal;       /*!< total number of values, including those outside of the histogram */
-    private long nUpdate;      /*!< number of times update() called (compared to warmup) */
-    private double mu;         /*!< current calculation of the mean */
-    private double m2;         /*!< running sum of squared deviation, used for variance calc */
-    private double min;        /*!< current minimum data value */
-    private double max;        /*!< current maximum data value */
-    private long iMax;         /*!< call # to update() at which maximum occurred */
-    private Instant tMax;      /*!< time at which the maximum occurred */
+    // Determined at construction time
+    private final long _d[];   /*!< fixed-size long array to hold the histogram */
+    private final double _histLowBound;/*!< lower bound of Histogram */
+    private final double _histUpBound; /*!< upper bound of Histogram */
+    private final double _binSize;/*!< Histogram bin step sizes */
+    private final int _nBins;  /*!< number of bins in the Histogram */
+    private final Optional<String> _label;/*!< Label for this histogram */
+
+    // Continually updated
+    private final long _warmup;/*!< ignore the first warmup samples in calls to update() */
+    private long _nHist;       /*!< number of values in histogram */
+    private long _nTotal;      /*!< total number of values, including those outside of the histogram */
+    private long _nUpdate;     /*!< number of times update() called (compared to warmup) */
+    private double _mean;      /*!< current calculation of the mean */
+    private double _sumSqDev;  /*!< running sum of squared deviation, used for variance calc */
+    private double _min;       /*!< current minimum data value */
+    private double _max;       /*!< current maximum data value */
+    private long _iMax;        /*!< call # to update() at which maximum occurred */
+    private Instant _tMax;     /*!< time at which the maximum occurred */
 
     /*
      ******************************************************************************
@@ -105,9 +110,9 @@ public class Histogram {
      * of timing statistics: one normally wants to start collecting data once
      * the system has been running for a while and has reached a steady-state.
      *
-     * \param[in] binMin (double) lower bound of the Histogram
-     * \param[in] binMax (double) upper bound of the Histogram
-     * \param[in] binStep (double) Histogram bin size
+     * \param[in] histLowBound (double) lower bound of the Histogram
+     * \param[in] histUpBound (double) upper bound of the Histogram
+     * \param[in] binSize (double) Histogram bin size
      * \param[in] warmup (long) how many samples to ignore until accumulation begins
      * \param[in] label (Optional<String>) Optional label for the Histogram.
      *
@@ -116,20 +121,24 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public Histogram(double binMin, double binMax, double binStep, long warmup, Optional<String> label) {
-        // Allocate histogram with bins of size binStep between binMin and binMax
-        this.binMin = binMin;
-        this.binMax = binMax;
-        this.binStep = binStep;
-        this.warmup = warmup;
-        this.label = label;
-        len = (int) ceil((binMax-binMin)/binStep);
-        d = new long[len];
-        nHist = 0;
-        nTotal = 0;
-        mu = 0;
-        m2 = 0;
-        nUpdate=0;
+    public Histogram(double histLowBound, double histUpBound, double binSize, long warmup, Optional<String> label) throws IllegalArgumentException {
+        if (warmup < 0) {
+            throw new IllegalArgumentException("warmup ("+warmup+") must be >= 0");
+        }
+
+        // Allocate histogram with bins of size binSize between histLowBound and histUpBound
+        _histLowBound = histLowBound;
+        _histUpBound = histUpBound;
+        _binSize = binSize;
+        _warmup = warmup;
+        _label = label;
+        _nBins = (int) ceil((_histUpBound - _histLowBound)/_binSize);
+        _d = new long[_nBins];
+        _nHist = 0;
+        _nTotal = 0;
+        _mean = 0;
+        _sumSqDev = 0;
+        _nUpdate =0;
     }
 
     /*
@@ -143,8 +152,8 @@ public class Histogram {
      * <b> Implementation Details: </b>\n\n
      * Identical to the base constructor, though with no warmup.
      *
-     * \param[in] binMin (double) lower bound of the Histogram
-     * \param[in] binMax (double) upper bound of the Histogram
+     * \param[in] histLowBound (double) lower bound of the Histogram
+     * \param[in] histUpBound (double) upper bound of the Histogram
      * \param[in] binStep (double) Histogram bin size
      * \param[in] label (Optional<String>) Optional label for the Histogram.
      *
@@ -153,8 +162,8 @@ public class Histogram {
      * \callgraph
      ******************************************************************************
      */
-    public Histogram(double binMin, double binMax, double binStep, Optional<String> label) {
-        this(binMin, binMax, binStep, 0, label);
+    public Histogram(double histLowBound, double histUpBound, double binStep, Optional<String> label) {
+        this(histLowBound, histUpBound, binStep, 0, label);
     }
 
     /*
@@ -212,38 +221,38 @@ public class Histogram {
      */
     public void update(double x) {
         // If we haven't gotten enough warmup samples yet, skip
-        if (++nUpdate <= warmup) {
+        if (++_nUpdate <= _warmup) {
             return;
         }
 
         // Add a value to the histogram and update running stats
-        if (nTotal == 0) {
-            min = x;
-            max = x;
-            iMax = nUpdate;
-            tMax = Instant.now();
+        if (_nTotal == 0) {
+            _min = x;
+            _max = x;
+            _iMax = _nUpdate;
+            _tMax = Instant.now();
         } else {
-            if (x > max) {
-                max = x;
-                iMax = nUpdate;
-                tMax = Instant.now();
+            if (x > _max) {
+                _max = x;
+                _iMax = _nUpdate;
+                _tMax = Instant.now();
             }
-            if (x < min) {
-                min = x;
+            if (x < _min) {
+                _min = x;
             }
         }
 
-        int bin = (int) floor(((x-binMin)/binStep));
-        if ( (bin >=0) && (bin<len) ) {
-            d[bin]++;
-            nHist++;
+        int bin = (int) floor(((x- _histLowBound)/ _binSize));
+        if ( (bin >=0) && (bin< _nBins) ) {
+            _d[bin]++;
+            _nHist++;
         }
 
         // Update running sums required for statistics
-        nTotal++;
-        double delta = x - mu;
-        mu += delta / nTotal;
-        m2 += delta * (x - mu);
+        _nTotal++;
+        double delta = x - _mean;
+        _mean += delta / _nTotal;
+        _sumSqDev += delta * (x - _mean);
     }
 
     /*
@@ -265,10 +274,10 @@ public class Histogram {
      ******************************************************************************
      */
     public double getMin() throws ArithmeticException {
-        if (nTotal == 0) {
+        if (_nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
-        return min;
+        return _min;
     }
 
     /*
@@ -290,10 +299,10 @@ public class Histogram {
      ******************************************************************************
      */
     public double getMax() throws ArithmeticException {
-        if (nTotal == 0) {
+        if (_nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
-        return max;
+        return _max;
     }
 
     /*
@@ -314,10 +323,10 @@ public class Histogram {
      ******************************************************************************
      */
     public long getiMax() throws ArithmeticException {
-        if (nTotal == 0) {
+        if (_nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
-        return iMax;
+        return _iMax;
     }
 
     /*
@@ -336,10 +345,10 @@ public class Histogram {
      ******************************************************************************
      */
     public Instant gettMax() throws ArithmeticException {
-        if (nTotal == 0) {
+        if (_nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
-        return tMax;
+        return _tMax;
     }
 
     /*
@@ -361,10 +370,10 @@ public class Histogram {
      ******************************************************************************
      */
     public double getMean() throws ArithmeticException {
-        if (nTotal == 0) {
+        if (_nTotal == 0) {
             throw new ArithmeticException("No values have been added.");
         }
-        return mu;
+        return _mean;
     }
 
     /*
@@ -393,10 +402,10 @@ public class Histogram {
      * ******************************************************************************
      */
     public double getVariance() throws ArithmeticException {
-        if (nTotal < 2) {
+        if (_nTotal < 2) {
             throw new ArithmeticException("Unable to calculate variance with < 2 samples.");
         }
-        return m2 / (nTotal-1);
+        return _sumSqDev / (_nTotal -1);
     }
 
     /*
@@ -452,21 +461,20 @@ public class Histogram {
 
             sb.append(Histogram.HIST_DELIM);
 
-            this.label.ifPresent(l->{
+            _label.ifPresent(l->{
                sb.append("\n\n"+l+"\n\n");
             });
 
             sb.append("Min: " + getMin() + " Mean: " + getMean() + " SD: " + getStdev() + "\n" +
-                    "Max: " + getMax() + " @ " + tMax + " (sample " + iMax + ")\n");
+                    "Max: " + getMax() + " @ " + _tMax + " (sample " + _iMax + ")\n");
 
             sb.append("Histogram (bin label represents lower bound)\n");
 
-            for (int i = 0; i < len; ++i) {
-                if (d[i] != 0) {
-                    sb.append((binMin + i * binStep) + ": " + d[i] + "\n");
+            for (int i = 0; i < _nBins; ++i) {
+                if (_d[i] != 0) {
+                    sb.append((_histLowBound + i * _binSize) + ": " + _d[i] + "\n");
                 }
             }
-
 
             retVal = sb.toString();
         } catch (ArithmeticException e) {
@@ -477,13 +485,25 @@ public class Histogram {
 
     // --- Simpler Getters  ----------------------------------------------------------------------------------------
 
-    /*! @copydoc nHist */
+    /*! @copydoc _d */
+    public long[] getd() { return Arrays.copyOf(_d,_d.length); }
+
+    /*! @copydoc _histLowBound */
+    public double gethistLowBound() { return _histLowBound; }
+
+    /*! @copydoc _histUpBound */
+    public double gethistUpBound() { return _histUpBound; }
+
+    /*! @copydoc _binSize */
+    public double getbinSize() { return _binSize; }
+
+    /*! @copydoc _nHist */
     public long getnHist() {
-        return nHist;
+        return _nHist;
     }
 
-    /*! @copydoc nTotal */
+    /*! @copydoc _nTotal */
     public long getnTotal() {
-        return nTotal;
+        return _nTotal;
     }
 }

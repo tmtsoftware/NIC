@@ -31,6 +31,7 @@
 
 package nic.util;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /*
@@ -60,22 +61,20 @@ import java.util.Optional;
  ******************************************************************************
  */
 public class Vect {
-    /*-------------------------------------------------------------------------
-     * Public Attributes
-     *-----------------------------------------------------------------------*/
-    public final double[] d;
 
     /*-------------------------------------------------------------------------
      * Private Attributes
      *-----------------------------------------------------------------------*/
 
-    // Since d is final it is safe to store the result of operations that
-    // depend only on d on the first invocation, and then simply return these
+    private final double[] _d; /*!< fixed-size double array holds vector data */
+
+    // Since __d is final it is safe to store the result of operations that
+    // depend only on _d on the first invocation, and then simply return these
     // stored values on subsequent invocations.
-    private Optional<Vect> abs = Optional.empty();
-    private Optional<Double> max = Optional.empty();
-    private Optional<Double> min = Optional.empty();
-    private Optional<Double> norm = Optional.empty();
+    private Optional<Vect> _abs = Optional.empty();
+    private Optional<Double> _max = Optional.empty();
+    private Optional<Double> _min = Optional.empty();
+    private Optional<Double> _norm = Optional.empty();
 
     /*
      ******************************************************************************
@@ -93,12 +92,12 @@ public class Vect {
      ******************************************************************************
      */
     public Vect(double[] d) {
-        this.d = d;
+        _d = d;
     }
 
     /*
      ******************************************************************************
-     * Vect::abs()
+     * Vect::_abs()
      ******************************************************************************
      *//*!
      * \brief
@@ -113,14 +112,14 @@ public class Vect {
      ******************************************************************************
      */
     public Vect abs() {
-        if (abs.isPresent()) {
-            return abs.get();
+        if (_abs.isPresent()) {
+            return _abs.get();
         } else {
-            Vect result = new Vect(new double[d.length]);
-            for (int i = 0; i < d.length; ++i) {
-                result.d[i] = Math.abs(d[i]);
+            Vect result = new Vect(new double[_d.length]);
+            for (int i = 0; i < _d.length; ++i) {
+                result._d[i] = Math.abs(_d[i]);
             }
-            abs = Optional.of(result);
+            _abs = Optional.of(result);
             return result;
         }
     }
@@ -145,11 +144,11 @@ public class Vect {
      */
     public double dot(Vect v) throws IllegalArgumentException {
         double result=0;
-        if (v.d.length != d.length) {
+        if (v._d.length != _d.length) {
             throw new IllegalArgumentException("Vectors must have the same length.");
         }
-        for (int i=0; i<d.length; ++i) {
-            result += d[i]*v.d[i];
+        for (int i = 0; i< _d.length; ++i) {
+            result += _d[i]*v._d[i];
         }
         return result;
     }
@@ -180,12 +179,12 @@ public class Vect {
             // same object so we can skip the element-wise test
             result = true;
         } else {
-            if (v.d.length != d.length) {
+            if (v._d.length != _d.length) {
                 throw new IllegalArgumentException("Vectors must have the same length.");
             }
             // Check element-wise equality
-            for (int i = 0; i < d.length; ++i) {
-                if (d[i] != v.d[i]) {
+            for (int i = 0; i < _d.length; ++i) {
+                if (_d[i] != v._d[i]) {
                     result = false;
                     break;
                 }
@@ -211,14 +210,14 @@ public class Vect {
      ******************************************************************************
      */
     public double max() {
-        if (max.isPresent()) {
-            return max.get();
+        if (_max.isPresent()) {
+            return _max.get();
         } else {
-            double result = d[0];
-            for (int i = 1; i < d.length; ++i) {
-                result = Math.max(result, d[i]);
+            double result = _d[0];
+            for (int i = 1; i < _d.length; ++i) {
+                result = Math.max(result, _d[i]);
             }
-            max = Optional.of(result);
+            _max = Optional.of(result);
             return result;
         }
     }
@@ -240,14 +239,14 @@ public class Vect {
      ******************************************************************************
      */
     public double min() {
-        if (min.isPresent()) {
-            return min.get();
+        if (_min.isPresent()) {
+            return _min.get();
         } else {
-            double result = d[0];
-            for (int i = 1; i < d.length; ++i) {
-                result = Math.min(result, d[i]);
+            double result = _d[0];
+            for (int i = 1; i < _d.length; ++i) {
+                result = Math.min(result, _d[i]);
             }
-            min = Optional.of(result);
+            _min = Optional.of(result);
             return result;
         }
     }
@@ -269,15 +268,15 @@ public class Vect {
      ******************************************************************************
      */
     public double norm() {
-        if (norm.isPresent()) {
-            return norm.get();
+        if (_norm.isPresent()) {
+            return _norm.get();
         } else {
             double sum = 0;
-            for (int i = 0; i < d.length; ++i) {
-                sum += d[i] * d[i];
+            for (int i = 0; i < _d.length; ++i) {
+                sum += _d[i] * _d[i];
             }
             double result = Math.sqrt(sum);
-            norm = Optional.of(result);
+            _norm = Optional.of(result);
             return result;
         }
     }
@@ -301,9 +300,9 @@ public class Vect {
      ******************************************************************************
      */
     public Vect plus(double a) {
-        Vect result = new Vect(new double[d.length]);
-        for (int i=0; i<d.length; ++i) {
-            result.d[i] = d[i]+a;
+        Vect result = new Vect(new double[_d.length]);
+        for (int i = 0; i< _d.length; ++i) {
+            result._d[i] = _d[i]+a;
         }
         return result;
     }
@@ -327,12 +326,16 @@ public class Vect {
      ******************************************************************************
      */
     public Vect times(double a) {
-        Vect result = new Vect(new double[d.length]);
-        for (int i=0; i<d.length; ++i) {
-            result.d[i] = a*d[i];
+        Vect result = new Vect(new double[_d.length]);
+        for (int i = 0; i< _d.length; ++i) {
+            result._d[i] = a*_d[i];
         }
         return result;
     }
 
+    // --- Simpler Getters  ----------------------------------------------------------------------------------------
+
+    /*! @copydoc _d */
+    public double[] getd() { return Arrays.copyOf(_d,_d.length); }
 
 }

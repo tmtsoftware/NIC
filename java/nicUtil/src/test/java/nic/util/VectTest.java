@@ -20,7 +20,8 @@ public class VectTest {
 
         // Subsequent call should used stored value
         Vect v_again = v3.abs();                // should be same object
-        Vect v_other = (new Vect(v3.d)).abs();  // different object with same values
+        Vect v_other = (new Vect(v3.getd())).abs();  // different object with same values
+
         assertEquals(v_again, v);
         assertNotEquals( v_again, v_other);     // not same object
         assertTrue(v_again.equals(v_other));    // but have the same values

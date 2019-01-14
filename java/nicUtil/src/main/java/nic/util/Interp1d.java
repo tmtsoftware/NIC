@@ -85,14 +85,14 @@ public class Interp1d {
     /*-------------------------------------------------------------------------
      * Private Attributes
      *-----------------------------------------------------------------------*/
-    private double[] x_table; /*!< optional x values corresponding to y values */
-    private double[] y_table; /*!< values to be interpolated */
+    private double[] _x_table;/*!< optional x values corresponding to y values */
+    private double[] _y_table;/*!< values to be interpolated */
 
-    private double x0_table;  /*!< reference x value for converting into array indices */
-    private double dx_table;  /*!< x step size for converting into array indices */
+    private double _x0_table; /*!< reference x value for converting into array indices */
+    private double _dx_table; /*!< x step size for converting into array indices */
 
-    private boolean yOnly;    /*!< false if constructed only with y-values */
-    private boolean regular;  /*!< flag indicating regularly-spaced data */
+    private boolean _yOnly;    /*!< false if constructed only with y-values */
+    private boolean _regular;  /*!< flag indicating regularly-spaced data */
 
     /*
      ******************************************************************************
@@ -122,9 +122,9 @@ public class Interp1d {
             throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
         }
 
-        this.y_table = y;
-        this.yOnly = true;
-        this.regular = true;
+        _y_table = y;
+        _yOnly = true;
+        _regular = true;
     }
 
     /*
@@ -147,7 +147,7 @@ public class Interp1d {
      *
      * \param[in] x (double[]) x-coordinates of values to be interpolated
      * \param[in] y (double[]) y-values to be interpolated
-     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced
+     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced along x-coordinate
      *
      * \return N/A
      *
@@ -170,26 +170,26 @@ public class Interp1d {
             throw new IllegalArgumentException("Supplied x and y vectors must have the same lengths");
         }
 
-        this.x_table = x;
-        this.y_table = y;
-        this.regular = regular;
+        _x_table = x;
+        _y_table = y;
+        _regular = regular;
 
-        if (this.regular) {
+        if (_regular) {
             // used to convert supplied values into array indices
-            this.x0_table = x[0];
-            this.dx_table = x[1] - x[0];
+            _x0_table = x[0];
+            _dx_table = x[1] - x[0];
         } else {
             // verify that x values are monotonic when irregularly spaced
-            for (int i=0; i<(x_table.length-1); ++i) {
-                double x0 = x_table[i];
-                double x1 = x_table[i+1];
+            for (int i = 0; i<(_x_table.length-1); ++i) {
+                double x0 = _x_table[i];
+                double x1 = _x_table[i+1];
 
                 if (x0 > x1) {
                     throw new ArithmeticException("Detected x array elements out of order at indices " + x0 + ", " + x1);
                 }
             }
         }
-        this.yOnly = false;
+        _yOnly = false;
     }
 
     /*
@@ -209,7 +209,7 @@ public class Interp1d {
      *
      * \param[in] filename (String) name of the file containing interpolation data
      * \param[in] twoColumns (boolean) indicate whether file contains just Y (false), or X and Y (true)
-     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced
+     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced along x-coordinate
      *
      * \return N/A
      *
@@ -296,29 +296,29 @@ public class Interp1d {
         double y0, y1;  // y values at bounding samples
         double i;       // fractional array index
 
-        if (regular) {
-            // If regularly spaced, we are just converting x into
+        if (_regular) {
+            // If regularly spaced we are just converting x into
             // a fractional array index, identify the values of
             // y on either side, and then performing linear interpolation.
-            if (yOnly) {
+            if (_yOnly) {
                 i = x;
             } else {
-                i = (x - x0_table) / dx_table;
+                i = (x - _x0_table) / _dx_table;
             }
 
             if (i < 1) {
                 i0 = 0;
                 i1 = 1;
-            } else if (i >= (y_table.length - 2)) {
-                i0 = y_table.length - 2;
-                i1 = y_table.length - 1;
+            } else if (i >= (_y_table.length - 2)) {
+                i0 = _y_table.length - 2;
+                i1 = _y_table.length - 1;
             } else {
                 i0 = (int) floor(i);
                 i1 = (int) ceil(i);
             }
 
-            y0 = y_table[i0];
-            y1 = y_table[i1];
+            y0 = _y_table[i0];
+            y1 = _y_table[i1];
 
             double m = (y1-y0)/1.;
             double b = y0 - m*i0;
@@ -327,21 +327,21 @@ public class Interp1d {
         } else {
             // For irregularly-spaced x do a binary search to find the
             // bounding indices to fit line segment.
-            i0 = searchXIndex(x, 0, x_table.length-1);
+            i0 = searchXIndex(x, 0, _x_table.length-1);
             i1 = i0+1;
 
-            y0 = y_table[i0];
-            y1 = y_table[i1];
+            y0 = _y_table[i0];
+            y1 = _y_table[i1];
 
-            double x0 = x_table[i0];
-            double x1 = x_table[i1];
+            double x0 = _x_table[i0];
+            double x1 = _x_table[i1];
 
             if (x0 == x1) {
                 // average if both values are equal
                 retval = (y0+y1)/2.;
             } else {
                 double m = (y1 - y0) / (x1 - x0);
-                double b = y0 - m * x_table[i0];
+                double b = y0 - m * _x_table[i0];
                 retval = m * x + b;
             }
 
@@ -380,11 +380,11 @@ public class Interp1d {
     public double valWithWrap(double x) {
         // Wrap x to within the range of the interpolation function
         double x_wrapped;
-        if (yOnly) {
-            x_wrapped = mod(x, y_table.length);
+        if (_yOnly) {
+            x_wrapped = mod(x, _y_table.length);
         } else {
-            double xRange = x_table[x_table.length-1] - x_table[0];
-            x_wrapped = mod((x - x_table[0]),xRange) + x_table[0];
+            double xRange = _x_table[_x_table.length-1] - _x_table[0];
+            x_wrapped = mod((x - _x_table[0]),xRange) + _x_table[0];
         }
         return val(x_wrapped);
     }
@@ -447,8 +447,8 @@ public class Interp1d {
      */
     private int searchXIndex(double x, int i0, int i1) {
         int retval;
-        double x0 = x_table[i0];
-        double x1 = x_table[i1];
+        double x0 = _x_table[i0];
+        double x1 = _x_table[i1];
 
         if ((i1-i0) <= 1) {
             retval = i0;
@@ -458,7 +458,7 @@ public class Interp1d {
             retval = i1-1;
         } else {
             int iMid = (i0 + i1)/2;
-            double xMid = x_table[iMid];
+            double xMid = _x_table[iMid];
             if (x > xMid) {
                 retval = searchXIndex(x,iMid,i1);
             } else {
