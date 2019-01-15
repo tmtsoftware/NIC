@@ -13,6 +13,12 @@ sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
 # The encoding to generate .sec files.
 DOXYGEN_DOC_ENCODING='utf-8'
 
+# model-file specific file names and tags
+command = {
+  'secfile'   : 'command.sec',
+  'tagprefix' : 'cmd_'
+}
+
 ## Sanitize a string so that it displays correctly with latex
 def latexStr(str):
   # Underscores need to be escaped.
@@ -294,7 +300,7 @@ def writeSubEvent(compDir, outDir, title):
 
 ## write commands section
 def writeCmd(compDir, outDir, prefix, title):
-  file = open(outDir+"/command.sec", 'w')
+  file = open(outDir+"/"+command['secfile'], 'w')
 
   filename = compDir+"/command-model.conf"
   if not os.path.isfile(filename):
@@ -331,9 +337,11 @@ def writeCmd(compDir, outDir, prefix, title):
 ##  Linking only works within the document that included the command.sec file.
 ##
 ##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      file.write("\latexonly\n\label{"+targetStr(name)+"}\n\endlatexonly\n")
-      file.write("\htmlonly<a id="+targetStr(name)+"></a>\endhtmlonly\n")
+      latex_tag = command['tagprefix']+latexStr(name)
+      html_tag = command['tagprefix']+targetStr(name)
+      file.write("\latexonly\n\subsection{"+latex_tag+" Command}\n\endlatexonly\n")
+      file.write("\latexonly\n\label{"+latex_tag+"}\n\endlatexonly\n")
+      file.write("\htmlonly<a id="+html_tag+"></a>\endhtmlonly\n")
 
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
