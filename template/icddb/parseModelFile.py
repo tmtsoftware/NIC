@@ -174,59 +174,6 @@ def writeComp(compDir, outDir):
 
   return prefix, title
 
-## write published telemetry section
-def writePubTelem(compDir, outDir, prefix, title):
-  file = open(outDir+"/publishTelem.sec", 'w')
-
-  filename = compDir+"/publish-model.conf"
-  if not os.path.isfile(filename):
-    file.write("N/A<br>\n")
-    file.close()
-    return
-
-  sys.stdout.flush()
-  conf = ConfigFactory.parse_file(filename)
-
-  if 'publish' not in conf:
-    return
-  pub = conf['publish']
-
-  if 'telemetry' in pub:
-    tel = pub['telemetry']
-
-    file.write("The {0} publishes the following telemetry items:\n\n".format(title))
-
-    for i in range(0, len(tel)):
-      name = getVal(tel[i],'name')
-
-      file.write("<hr>\n")
-      file.write("\latexonly\n\subsection{"+latexStr(name)+" Telemetry}\n\endlatexonly\n")
-      file.write("<b>Telemetry item:</b> {0}.{1}<br>\n".format(prefix,name))  
-
-      if 'archive' in tel[i]:
-        file.write("<b>Archived:</b> {0}<br>\n".format(tel[i]['archive']))
-
-      str = getRateStr(tel[i])
-      if str != '':
-        file.write(str)
-
-      file.write("{0}<br>\n\n".format(getVal(tel[i],'description')))
-
-      if 'attributes' in tel[i]:
-        file.write("<table>\n<tr><th> Attribute <th> Data Type <th> Units <th> Range <th> Description\n")
-        attr = tel[i]['attributes']
-        for j in range(0, len(attr)):
-          file.write("<tr><td> "+getVal(attr[j],'name'))
-          dateType, rangeStr = getDtStr(attr[j])
-          file.write("<td> "+dateType)
-          file.write("<td> "+getVal(attr[j],'units'))
-          file.write("<td> "+rangeStr)
-          file.write("<td> "+getVal(attr[j],'description'))
-        file.write("\n</table>\n\n")
-  else:
-    file.write("N/A<br>\n")
-
-  file.close()
 
 ## write published event section 
 def writePubEvent(compDir, outDir, prefix, title):
@@ -308,40 +255,6 @@ def writeAlarm(compDir, outDir, prefix, title):
       file.write("<td> {0}".format(getVal(alarm[i],'archive')))
       file.write("<td> "+getVal(alarm[i],'description'))
     file.write("\n</table>\n\n")
-
-  file.close()
-
-
-## write subscribed telemetry section
-def writeSubTelem(compDir, outDir, title):
-  file = open(outDir+"/subscribeTelem.sec", 'w')
-
-  filename = compDir+"/subscribe-model.conf"
-  if not os.path.isfile(filename):
-    file.write("N/A<br>\n")
-    file.close()
-    return
-  conf = ConfigFactory.parse_file(filename)
- 
-  if 'subscribe' not in conf:
-    return
-  sub = conf['subscribe']
-
-  if 'telemetry' in sub:
-    tel = sub['telemetry']
-
-    file.write("The {0} subscribes to the following telemetry items:\n\n".format(title))
-
-    file.write("<table>\n<tr><th> Subscription <th> Rate (Hz)\n")
-    for i in range(0, len(tel)):
-      item, rate = getSubTableStr(tel[i])
-      file.write("<tr><td> {0} <td> {1}".format(item,rate))
-      if 'usage' in tel[i]:
-        file.write("<br><b>Usage:</b><br>"+tel[i]['usage'])
-      file.write("\n")
-    file.write("</table>\n")
-  else:
-    file.write("N/A<br>\n")
 
   file.close()
 
@@ -459,9 +372,7 @@ try:
 
   compDir = "{0}/{1}".format(inDir,compName)
   prefix, title = writeComp(compDir,outDir)
-  writeSubTelem(compDir,outDir,title)
   writeSubEvent(compDir,outDir,title)
-  writePubTelem(compDir,outDir,prefix,title)
   writePubEvent(compDir,outDir,prefix,title)
   writeAlarm(compDir,outDir,prefix,title)
   writeCmd(compDir,outDir,prefix,title)
