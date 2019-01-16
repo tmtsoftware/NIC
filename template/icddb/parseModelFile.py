@@ -16,7 +16,7 @@ DOXYGEN_DOC_ENCODING='utf-8'
 # model-file specific file names and tags
 command = {
   'secfile'   : 'command.sec',
-  'tagprefix' : 'cmd_'
+  'tagprefix' : 'cmd'
 }
 
 ## Sanitize a string so that it displays correctly with latex
@@ -339,7 +339,7 @@ def writeCmd(compDir, outDir, prefix, title):
 ##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       latex_tag = command['tagprefix']+latexStr(name)
       html_tag = command['tagprefix']+targetStr(name)
-      file.write("\latexonly\n\subsection{"+latex_tag+" Command}\n\endlatexonly\n")
+      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
       file.write("\latexonly\n\label{"+latex_tag+"}\n\endlatexonly\n")
       file.write("\htmlonly<a id="+html_tag+"></a>\endhtmlonly\n")
 
