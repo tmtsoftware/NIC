@@ -13,10 +13,42 @@ sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
 # The encoding to generate .sec files.
 DOXYGEN_DOC_ENCODING='utf-8'
 
-# model-file specific file names and tags
-command = {
+# Configurations for subsections that render information from model files:
+#
+#   modelfile: refers to the input model file from which the data are parsed
+#   secfile  : section that will be included in a doxygen file
+#   tagprefix: prefix that will be added to item names to create tags
+#
+# Note that a number of ALIASES have been added to template.doxconf that
+# make use of the tags to simplify cross-referencing.
+
+command_c = {
+  'modelfile' : 'command-model.conf',
   'secfile'   : 'command.sec',
-  'tagprefix' : 'cmd'
+  'tagprefix' : 'cmd'   # should match "icdcmd" ALIAS in template.doxconf
+}
+
+pubevent_c = {
+  'modelfile' : 'publish-model.conf',
+  'secfile'   : 'publishEvent.sec',
+  'tagprefix' : 'pubev' # should match "icdpubev" ALIAS in template.doxconf
+}
+
+subevent_c = {
+  'modelfile' : 'subscribe-model.conf',
+  'secfile'   : 'subscribeEvent.sec',
+  'tagprefix' : 'subev' # should match "icdsubbev" ALIAS in template.doxconf
+}
+
+component_c = {
+  'modelfile' : 'component-model.conf',
+  'secfile'   : 'component.sec'
+}
+
+alarm_c = {
+  'modelfile' : 'publish-model.conf',
+  'secfile'   : 'alarm.sec',
+  'tagprefix' : 'alarm' # should match "icdalarm" ALIAS in template.doxconf
 }
 
 ## Sanitize a string so that it displays correctly with latex
@@ -30,6 +62,15 @@ def targetStr(str):
   # Underscores need to be removed.
   str_sanitized = str.replace('_','')
   return str_sanitized
+
+## Generate tag string for both LaTex and HTML output using prefix
+## specified in the various subsection *_c configuration dictionaries
+def getTag(model_c,name):
+  latex_tag = model_c['tagprefix']+latexStr(name)
+  html_tag = model_c['tagprefix']+targetStr(name)
+  tagstr = "\latexonly\n\label{"+latex_tag+"}\n\endlatexonly\n" + \
+    "\htmlonly<a id="+html_tag+"></a>\endhtmlonly\n"
+  return tagstr
 
 ## get a value from the directory, if not present then an empty string is returned
 def getVal(dir,name):
@@ -160,9 +201,9 @@ def getSubTableStr(tel):
 
 ## write component section
 def writeComp(compDir, outDir):
-  file = open(outDir+"/component.sec", 'w')
+  file = open(outDir+"/"+component_c['secfile'], 'w')
 
-  filename = compDir+"/component-model.conf"
+  filename = compDir+"/"+component_c['modelfile']
   if not os.path.isfile(filename):
     file.write("N/A<br>\n")
     file.close()
@@ -183,9 +224,9 @@ def writeComp(compDir, outDir):
 
 ## write published event section 
 def writePubEvent(compDir, outDir, prefix, title):
-  file = open(outDir+"/publishEvent.sec", 'w')
+  file = open(outDir+"/"+pubevent_c['secfile'], 'w')
 
-  filename = compDir+"/publish-model.conf"
+  filename = compDir+"/"+pubevent_c['modelfile']
   if not os.path.isfile(filename):
     file.write("N/A<br>\n")
     file.close()
@@ -203,9 +244,17 @@ def writePubEvent(compDir, outDir, prefix, title):
 
     for i in range(0, len(tel)):
       name = getVal(tel[i],'name')
-
       file.write("<hr>\n")
+
+      ##  Enable linking to published event subsections.
+      ##  In the doxygen file, add the following to lines to link to an event foo.
+      ##  \latexonly \hyperref[foo]{foo}\endlatexonly
+      ##  \htmlonly<a href="#foo">foo</a>\endhtmlonly
+      ##
+      ##  Linking only works within the document that included the publishEvent.sec file.
       file.write("\latexonly\n\subsection{"+latexStr(name)+" Event}\n\endlatexonly\n")
+      file.write(getTag(pubevent_c,name))
+
       file.write("<b>Event item:</b> {0}.{1}<br>\n".format(prefix,name))  
 
       if 'archive' in tel[i]:
@@ -236,9 +285,9 @@ def writePubEvent(compDir, outDir, prefix, title):
 
 ## write published alarms section
 def writeAlarm(compDir, outDir, prefix, title):
-  file = open(outDir+"/alarm.sec", 'w')
+  file = open(outDir+"/"+alarm_c['secfile'], 'w')
 
-  filename = compDir+"/publish-model.conf"
+  filename = compDir+"/"+alarm_c['modelfile']
   if not os.path.isfile(filename):
     file.write("N/A<br>\n")
     file.close()
@@ -256,7 +305,15 @@ def writeAlarm(compDir, outDir, prefix, title):
     
     file.write("<table>\n<tr><th> Alarm <th> Severity <th> Archived <th> Description\n")
     for i in range(0, len(alarm)):
-      file.write("<tr><td> {0}.{1} ".format(prefix,getVal(alarm[i],'name')))  
+      name = getVal(alarm[i],'name')
+      
+      ##  Enable linking to published alarms.
+      ##  See ALIASES in template.doxconf to see how to reference alarm tags.
+      ##
+      ##  Linking only works within the document that included the alarm.sec file.
+      file.write(getTag(alarm_c,name.split('.')[-1]))
+
+      file.write("<tr><td> {0}.{1} ".format(prefix,name))
       file.write("<td> "+getVal(alarm[i],'severity'))
       file.write("<td> {0}".format(getVal(alarm[i],'archive')))
       file.write("<td> "+getVal(alarm[i],'description'))
@@ -266,9 +323,9 @@ def writeAlarm(compDir, outDir, prefix, title):
 
 ## write subscribed event section
 def writeSubEvent(compDir, outDir, title):
-  file = open(outDir+"/subscribeEvent.sec", 'w')
+  file = open(outDir+"/"+subevent_c['secfile'], 'w')
 
-  filename = compDir+"/subscribe-model.conf"
+  filename = compDir+"/"+subevent_c['modelfile']
   if not os.path.isfile(filename):
     file.write("N/A<br>\n")
     file.close()
@@ -287,6 +344,13 @@ def writeSubEvent(compDir, outDir, title):
     file.write("<table>\n<tr><th> Subscription <th> Rate (Hz)\n")
     for i in range(0, len(tel)):
       item, rate = getSubTableStr(tel[i])
+      
+      ##  Enable linking to subscribed events.
+      ##  See ALIASES in template.doxconf to see how to reference subscribed events.
+      ##
+      ##  Linking only works within the document that included the subscribeEvent.sec file.
+      file.write(getTag(subevent_c,item))
+
       file.write("<tr><td> {0} <td> {1}".format(item,rate))
       if 'usage' in tel[i]:
         file.write("<br><b>Usage:</b><br>"+tel[i]['usage'])
@@ -300,9 +364,9 @@ def writeSubEvent(compDir, outDir, title):
 
 ## write commands section
 def writeCmd(compDir, outDir, prefix, title):
-  file = open(outDir+"/"+command['secfile'], 'w')
+  file = open(outDir+"/"+command_c['secfile'], 'w')
 
-  filename = compDir+"/command-model.conf"
+  filename = compDir+"/"+command_c['modelfile']
   if not os.path.isfile(filename):
     file.write("N/A<br>\n")
     file.close()
@@ -313,7 +377,7 @@ def writeCmd(compDir, outDir, prefix, title):
     return
   rec = conf['receive']
 
-  file.write("The {0} accepts the following commands:\n\n".format(title))
+  file.write("The {0} accepts the following command_cs:\n\n".format(title))
     
   file.write("\latexonly \\begin{itemize}\n")
 
@@ -329,19 +393,12 @@ def writeCmd(compDir, outDir, prefix, title):
 
       file.write("<hr>\n")
 
-##  Added functionality to allow linking to command subsections.
-##  In the doxygen file, add the following to lines to link to a command foo.
-##  \latexonly \hyperref[foo]{foo}\endlatexonly
-##  \htmlonly<a href="#foo">foo</a>\endhtmlonly
-##
-##  Linking only works within the document that included the command.sec file.
-##
-##      file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      latex_tag = command['tagprefix']+latexStr(name)
-      html_tag = command['tagprefix']+targetStr(name)
+      ##  Enable linking to command subsections.
+      ##  See ALIASES in template.doxconf to see how to reference command tags.
+      ##
+      ##  Linking only works within the document that included the command.sec file.
       file.write("\latexonly\n\subsection{"+latexStr(name)+" Command}\n\endlatexonly\n")
-      file.write("\latexonly\n\label{"+latex_tag+"}\n\endlatexonly\n")
-      file.write("\htmlonly<a id="+html_tag+"></a>\endhtmlonly\n")
+      file.write(getTag(command_c,name))
 
       file.write("<b>Command:</b> {0}.{1}<br>\n".format(prefix,name))  
       file.write("{0}<br>\n\n".format(getVal(rec[i],'description')))
