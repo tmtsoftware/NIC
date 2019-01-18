@@ -222,6 +222,10 @@ ALIASES                += icdalarm{1}="\latexonly\hyperref[alarm\1]{\1}\endlatex
 # be specified in the argument (e.g., "component.foo" instead of just "foo").
 ALIASES                += icdsubev{1}="\latexonly\hyperref[subev\1]{\1}\endlatexonly\htmlonly<a href=\"#subev\1\">\1</a>\endhtmlonly"
 
+# there are not currently any hyperlinks to particular command/event attributes,
+# but this alias can be used to ensure uniform formatting
+ALIASES                += icdattr{1}="<em>\1</em>"
+
 # -----------------------------------------------------------------------------
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).

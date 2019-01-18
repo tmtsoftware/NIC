@@ -377,14 +377,14 @@ def writeCmd(compDir, outDir, prefix, title):
     return
   rec = conf['receive']
 
-  file.write("The {0} accepts the following command_cs:\n\n".format(title))
+  file.write("The {0} accepts the following commands:\n\n".format(title))
     
   file.write("\latexonly \\begin{itemize}\n")
 
   for i in range(0, len(rec)):
       name = getVal(rec[i],'name')
       file.write("\\item ")
-      file.write("\hyperref[" + targetStr(name) + "]{" + latexStr(name) + "}\n")
+      file.write("\hyperref[" + command_c['tagprefix']+targetStr(name) + "]{" + latexStr(name) + "}\n")
 
   file.write("\\end{itemize} \endlatexonly\n")
 
