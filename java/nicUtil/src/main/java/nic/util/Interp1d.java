@@ -41,6 +41,7 @@ import java.util.List;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
+import static java.lang.Math.abs;
 
 /*
  ******************************************************************************
@@ -270,6 +271,31 @@ public class Interp1d {
             // linear interpolation
             _x0_table = x[0];
             _dx_table = x[1] - x[0];
+
+            if (_dx_table <= 0) {
+                throw new ArithmeticException("First two elements of x are either equal or decreasing: " + x[0] + ", " + x[1]);
+            }
+
+            // Idiot check: verify that the values are monotonic, and that the spacing is
+            // at least roughly constant (don't want to get to fancy worrying about
+            // numerical precision).
+
+            double tol = 0.001*_dx_table; // spacing tolerance a small factor of _dx_table
+
+            for (int i = 0; i<(_x_table.length-1); ++i) {
+                double x0 = _x_table[i];
+                double x1 = _x_table[i+1];
+
+                double this_dx = x1-x0;
+                if (this_dx <= 0) {
+                    throw new ArithmeticException("Detected decreasing x values at indices " + i + ", " + (i+1));
+                }
+
+
+                if (abs(this_dx-_dx_table) > tol) {
+                    throw new ArithmeticException("Detected non-uniform spacing between indices " +i + ", " + (i+1));
+                }
+            }
         } else {
             // when not assuming regularly-spaced x, verify that the values are monotonic
             // so that we can perform a binary search

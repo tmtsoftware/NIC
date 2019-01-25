@@ -38,6 +38,13 @@ public class Interp1dTest {
         System.out.println("Shouldn't see this: " + t0.eval(3.0));
     }
 
+    @Test(expected = ArithmeticException.class)
+    public void invalidRegularOrder() throws ArithmeticException {
+        // Should throw exception because X values irregularly spaced
+        Interp1d t0 = new Interp1d(v7, v8, true);
+        System.out.println("Shouldn't see this: " + t0.eval(3.0));
+    }
+
     @Test
     public void val() {
         // y only, 2-element array
