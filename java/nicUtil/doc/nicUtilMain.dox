@@ -16,7 +16,7 @@ The library currently consists of the following classes:
 
 <tr><td> nic.util.Interp1d  <td> This class is used to perform interpolation of regularly and irregularly-spaced one-dimenional data. The data may be provided as arrays of double-precision values, or whitespace-separated columns of data in text files. This class is useful for implementing things like lookup tables (e.g., for pointing models). Interpolation can optionally wrap at the endpoints (e.g., for repeating waveforms); otherwise data will be extrapolated past the endpoints.
 
-<tr><td> nic.util.Vect      <td> A class that implements basic one-dimensional vectors and several scalar and vector operations. The intended use is to support simple linear algebra without any external dependencies. For more complex applications (e.g., matrices, more variety of operations, or improved performance for large) it is recommended that you instead use a more powerful and actively-developed library such as [oj!](http://www.ojalgo.org/).
+<tr><td> nic.util.Vect      <td> A class that implements basic one-dimensional vectors and several scalar and vector operations. The intended use is to support simple linear algebra without any external dependencies. For more complex applications (e.g., matrices, more variety of operations, or improved performance for large data sets) it is recommended that you instead use a more powerful and actively-developed library such as [oj!](http://www.ojalgo.org/).
 
 </table>
 
