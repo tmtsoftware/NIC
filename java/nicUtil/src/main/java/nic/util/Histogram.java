@@ -24,7 +24,7 @@
 /*!
  ******************************************************************************
  * \file Histogram.java
- * \brief This file implements a class that inserts data into a histogram.
+ * \brief This file implements the nic.util.Histogram class for accumulating data into a histogram.
  * <hr>
  ******************************************************************************
  */
@@ -56,11 +56,48 @@ import static java.lang.Math.*;
  * gethistLowBound(), and gethistUpBound(), respectively, to get a sense of
  * how the range of the histogram compares to the input data).
  *
+ * Examples:
+ *
+ * \code
+ * // Create histogram with 10 bins from 0 to 10 labeled "test"
+ * Histogram h = new Histogram(0,10,1, Optional.of("test"));
+ *
+ * // Add a single value to the histogram
+ * h.update(5.);
+ *
+ * // Add several values to the histogram
+ * h.update(new double[]{7.5, 0.1, 1.});
+ *
+ * // Get the min, mean, max, and standard deviation of the accumulated values
+ * double min = h.getMin();
+ * double mean = h.getMean();
+ * double max = h.getMax();
+ * double stdev = h.getStdev();
+ *
+ * // Add a value beyond the bounds of the histogram
+ * h.update(-100);
+ *
+ * // The minimum value will correctly report -100 even though it is
+ * // beyond the lower bound of the histogram:
+ * min = h.getMin();
+ *
+ * // You can find out the total number of items added in this way:
+ * long nTotal = h.getnTotal();
+ *
+ * // You can also find out how many landed only within the histogram bounds this way:
+ * long nHist = h.getnHist();
+ *
+ * // Nicely-formatted text output that can be plotted with daoPlotHist.py (from daoToolkit):
+ * string histStr = h.toString()
+ *
+ * \endcode
+ *
+ * For more examples see tests in HistogramTest.java .
+ *
  * <hr>
  * \callgraph
  ******************************************************************************
  */
-
 public class Histogram {
 
     /*-----------------------------------------------------------------------------

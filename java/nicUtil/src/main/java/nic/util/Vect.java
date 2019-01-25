@@ -1,7 +1,7 @@
 /******************************************************************************
  ****         D A O   I N S T R U M E N T A T I O N   G R O U P           *****
  *
- * (c) 2018                               (c) 2018
+ * (c) 2018-2019                          (c) 2018-2019
  * National Research Council              Conseil national de recherches
  * Ottawa, Canada, K1A 0R6                Ottawa, Canada, K1A 0R6
  * All rights reserved                    Tous droits reserves
@@ -24,7 +24,7 @@
 /*!
  ******************************************************************************
  * \file Vect.java
- * \brief This file implements a utility class for vectors.
+ * \brief This file implements the nic.util.Vect vector utility class.
  * <hr>
  ******************************************************************************
  */
@@ -56,6 +56,29 @@ import java.util.Optional;
  *   - plus() to perform scalar addition
  *   - times() to perform scalar multiplication
  *
+ * Examples:
+ *
+ * \code
+ * // Create two Vect objects with the same number of elements
+ * Vect v1 = new Vect(new double[]{5,6,0});
+ * Vect v2 = new Vect(new double[]{1,2,3});
+ *
+ * // Check for equality of v1 and v2
+ * boolean isEqual = v1.equals(v2);
+ *
+ * // Calculate the dot product of v1 and v2
+ * double d = v1.dot(v2);
+ *
+ * // Calculate a new Vect that results from adding a scalar to v1
+ * Vect v3 = v1.plus(42.0);
+ *
+ * // Calculate a new Vect that results from multiplying v1 by a scalar
+ * Vect v4 = v1.times(3.14);
+ *
+ * \endcode
+ *
+ * For more examples see tests in VectTest.java .
+ *
  * <hr>
  * \callgraph
  ******************************************************************************
@@ -84,7 +107,7 @@ public class Vect {
      * \brief
      * Default constructor provided an array of values.
      *
-     * \param[d] d (double[]) array of data for the Vector.
+     * \param[in] d (double[]) array of data for the Vector.
      *
      * \return N/A
      *
@@ -106,7 +129,7 @@ public class Vect {
      * <b> Implementation Details: </b>\n\n
      * Creates a new vector in which each element is the absolute value.
      *
-     * \return (Vect) vector of absolute values
+     * \return (Vect) new vector of absolute values
      *
      * \callgraph
      ******************************************************************************
@@ -204,7 +227,7 @@ public class Vect {
      * <b> Implementation Details: </b>\n\n
      * Calculates the maximum value of the vector.
      *
-     * \return (double) the vector minimum.
+     * \return (double) the vector maximum.
      *
      * \callgraph
      ******************************************************************************
@@ -294,7 +317,7 @@ public class Vect {
      *
      * \param[in] a (double) scalar value to add
      *
-     * \return (Vect) vector of added values.
+     * \return (Vect) new vector with a added to each element.
      *
      * \callgraph
      ******************************************************************************
@@ -320,7 +343,7 @@ public class Vect {
      *
      * \param[in] a (double) scalar multiplier
      *
-     * \return (Vect) vector of multiplied values.
+     * \return (Vect) new vector with each element multiplied by a.
      *
      * \callgraph
      ******************************************************************************
@@ -333,7 +356,7 @@ public class Vect {
         return result;
     }
 
-    // --- Simpler Getters  ----------------------------------------------------------------------------------------
+    // --- Simple Getters  ----------------------------------------------------------------------------------------
 
     /*! @copydoc _d */
     public double[] getd() { return Arrays.copyOf(_d,_d.length); }

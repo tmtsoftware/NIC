@@ -1,9 +1,9 @@
 include ../config/config.mk
 
 COMP := nicUtil
-COMP_NAME := "NIC Util Java Library"
-TITLE := "NIC Util Java Library Implementation Details"
-INPUT := \. \.\./src/main/java/nic/util
+COMP_NAME := "nic.util"
+TITLE := "nic.util Java utility library"
+INPUT := \. \.\./src/main/java/nic/util \.\./src/test
 
 all:
 	$(call make_doxygen_doc)

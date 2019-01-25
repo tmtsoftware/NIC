@@ -1,7 +1,7 @@
 /******************************************************************************
  ****         D A O   I N S T R U M E N T A T I O N   G R O U P           *****
  *
- * (c) 2018                               (c) 2018
+ * (c) 2018-2019                          (c) 2018-2019
  * National Research Council              Conseil national de recherches
  * Ottawa, Canada, K1A 0R6                Ottawa, Canada, K1A 0R6
  * All rights reserved                    Tous droits reserves
@@ -24,7 +24,7 @@
 /*!
  ******************************************************************************
  * \file Interp1d.java
- * \brief This file implements a class for performing 1-dimensional interpolation
+ * \brief This file implements the nic.util.Interp1d class for performing 1-dimensional interpolation
  * <hr>
  ******************************************************************************
  */
@@ -75,6 +75,49 @@ import static java.lang.Math.floor;
  * using the val() methods, or with wrapping using the valWithWrap() method.
  *
  * Presently there is only support for linear interpolation/extrapolation.
+ *
+ * Examples:
+ *
+ * \code
+ * // Given a table of values, calculate the interpolated value at index 1.5
+ * // (it will be 3.0, half-way between the values 2.0 and 4.0):
+ * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
+ * double interpVal = interp.val(1.5);
+ *
+ * // Given a table of values, calculate the extrapolated value at index 4
+ * // past the end of the table (result should be 8.0, as the last index of
+ * // the table is 2, the slope is also 2, and so 4.0 + 2*2 = 8.0.
+ * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
+ * double interpVal = interp.val(4);
+ *
+ * // Given a table of values, calculate the wrapped value at index 4 (wraps
+ * // to index 2, so the answer should be 4.0).
+ * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
+ * double interpVal = interp.valWithWrap(4);
+ *
+ * // Given a regularly-spaced table of heights vs. position, calculate the interpolated
+ * // height at an intermediate position 0.2
+ * double[] positions = new double[]{0,1,2};
+ * double[] heights = new double[]{1,3,5};
+ * Interp1d interp = new Interp1d(positions,heights,true);
+ * double interpHeight = interp.val(0.2);
+ *
+ * // Given an irregularly-spaced table of heights vs. position, calculate the interpolated
+ * // height at an intrermediate position 0.2
+ * double[] positions = new double[]{0,1,1.5,5};
+ * double[] heights = new double[]{1,3,5,3};
+ * Interp1d interp = new Interp1d(positions,heights,false);
+ * double interpHeight = interp.val(0.2);
+ *
+ * // Given an irregularly-spaced table of heights vs. position stored in a text file
+ * // called "data.txt" (first column is position, second column is height, separated
+ * // with whitespace), calculate the interpolated height at an intrermediate position 0.2
+ * Interp1d interp = new Interp1d("data.txt", true, false);
+ * double interpHeight = interp.val(0.2);
+ *
+ * \endcode
+ *
+ * For more examples see tests in Interp1dTest.java .
  *
  * <hr>
  * \callgraph
@@ -141,9 +184,11 @@ public class Interp1d {
      * Subsequent calls to val() interpret the argument as x values at which to
      * evaluate the interpolation.
      * The caller can assert that the x-values are regularly sampled (equally spaced),
-     * which will result in a slight performance improvement (no checking is performed).
+     * which will result in a performance improvement (no checking is performed)
+     * since bounding array indices to be interpolated are established using linear interpolation.
      * Otherwise, irregularly-spaced data may also be provided (setting regular to
-     * false), though it must be sorted in monotonically increasing order of x (checked).
+     * false), though it must be sorted in monotonically increasing order of x (checked),
+     * and a much slower recursive binary search is used to find the bounding indices.
      *
      * \param[in] x (double[]) x-coordinates of values to be interpolated
      * \param[in] y (double[]) y-values to be interpolated
