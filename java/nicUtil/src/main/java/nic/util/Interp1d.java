@@ -60,19 +60,19 @@ import static java.lang.Math.floor;
  * by the TCS).
  *
  * If the constructor is given a single vector, Y, the interpolation
- * method val() takes a fractional array index as the argument (i.e., val(0.5) would
+ * method eval() takes a fractional array index as the argument (i.e., eval(0.5) would
  * return the interpolated value between the first and second elements of Y).
  *
- * If the constructor is provided with two vectors X and Y, then val() returns
+ * If the constructor is provided with two vectors X and Y, then eval() returns
  * the interpolated value at the requested x-coordinate. For example, if X
  * were an array of time stamps (seconds), and Y positions at those time stamps,
- * val(32.3) would return the interpolated Y-value at 32.3 seconds.
+ * eval(32.3) would return the interpolated Y-value at 32.3 seconds.
  *
  * Data may be provided using double[] arrays or a named file containing columns of
  * values that will be read.
  *
  * For data values beyond the extent of X and Y, extrapolation is achieved
- * using the val() methods, or with wrapping using the valWithWrap() method.
+ * using the eval() methods, or with wrapping using the evalWithWrap() method.
  *
  * Presently there is only support for linear interpolation/extrapolation.
  *
@@ -82,38 +82,38 @@ import static java.lang.Math.floor;
  * // Given a table of values, calculate the interpolated value at index 1.5
  * // (it will be 3.0, half-way between the values 2.0 and 4.0):
  * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
- * double interpVal = interp.val(1.5);
+ * double interpVal = interp.eval(1.5);
  *
  * // Given a table of values, calculate the extrapolated value at index 4
  * // past the end of the table (result should be 8.0, as the last index of
  * // the table is 2, the slope is also 2, and so 4.0 + 2*2 = 8.0.
  * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
- * double interpVal = interp.val(4);
+ * double interpVal = interp.eval(4);
  *
  * // Given a table of values, calculate the wrapped value at index 4 (wraps
  * // to index 2, so the answer should be 4.0).
  * Interp1d interp = new Interp1d(new double[]{0.0, 2.0, 4.0};
- * double interpVal = interp.valWithWrap(4);
+ * double interpVal = interp.evalWithWrap(4);
  *
  * // Given a regularly-spaced table of heights vs. position, calculate the interpolated
  * // height at an intermediate position 0.2
  * double[] positions = new double[]{0,1,2};
  * double[] heights = new double[]{1,3,5};
  * Interp1d interp = new Interp1d(positions,heights,true);
- * double interpHeight = interp.val(0.2);
+ * double interpHeight = interp.eval(0.2);
  *
  * // Given an irregularly-spaced table of heights vs. position, calculate the interpolated
  * // height at an intrermediate position 0.2
  * double[] positions = new double[]{0,1,1.5,5};
  * double[] heights = new double[]{1,3,5,3};
  * Interp1d interp = new Interp1d(positions,heights,false);
- * double interpHeight = interp.val(0.2);
+ * double interpHeight = interp.eval(0.2);
  *
  * // Given an irregularly-spaced table of heights vs. position stored in a text file
  * // called "data.txt" (first column is position, second column is height, separated
  * // with whitespace), calculate the interpolated height at an intrermediate position 0.2
  * Interp1d interp = new Interp1d("data.txt", true, false);
- * double interpHeight = interp.val(0.2);
+ * double interpHeight = interp.eval(0.2);
  *
  * \endcode
  *
@@ -147,7 +147,7 @@ public class Interp1d {
      *
      * <b> Implementation Details: </b>\n\n
      * The caller provides a vector of regularly-spaced values to be interpolated.
-     * Subsequent calls to val() interpret the argument as fractional array indices.
+     * Subsequent calls to eval() interpret the argument as fractional array indices.
      *
      * \param[in] y (double[]) regularly-spaced values
      *
@@ -171,7 +171,7 @@ public class Interp1d {
      *
      * <b> Implementation Details: </b>\n\n
      * The caller provides a vector of regularly-spaced values to be interpolated.
-     * Subsequent calls to val() interpret the argument as fractional array indices.
+     * Subsequent calls to eval() interpret the argument as fractional array indices.
      *
      * \param[in] y (double[]) regularly-spaced values
      *
@@ -201,7 +201,7 @@ public class Interp1d {
      * <b> Implementation Details: </b>\n\n
      * The caller provides a list of y-values to be interpolated, with corresponding
      * x-values.
-     * Subsequent calls to val() interpret the argument as x values at which to
+     * Subsequent calls to eval() interpret the argument as x values at which to
      * evaluate the interpolation.
      * The caller can assert that the x-values are regularly sampled (equally spaced),
      * which will result in a performance improvement (no checking is performed)
@@ -361,7 +361,7 @@ public class Interp1d {
 
     /*
      ******************************************************************************
-     * Method Interp1d::val()
+     * Method Interp1d::eval()
      ******************************************************************************
      *//*!
      * \brief
@@ -369,18 +369,18 @@ public class Interp1d {
      *
      * <b> Implementation Details: </b>\n\n
      * If the object was constructed only with Y values, the argument is interpreted
-     * as a fractional array index into Y (i.e., val(0.5) returns the value interpolated
+     * as a fractional array index into Y (i.e., eval(0.5) returns the value interpolated
      * between the first and second elements of Y).
      *
      * If the object was constructed with X and Y values, the argument is interpreted
      * as the x value at which to obtain an interpolated value. For example, if X
      * were an array of time stamps (seconds), and Y positions at those time stamps,
-     * val(32.3) would return the interpolated position at 32.3 seconds.
+     * eval(32.3) would return the interpolated position at 32.3 seconds.
      *
      * If the argument lies beyond the range of the input data (array length in the
      * case of Y only, or the range of X if specified), then the returned value
      * is the linear extrapolation of the nearest two data points. For example, if
-     * constructed using Y=[0,2], then val(2) is an index past the end of the Y array,
+     * constructed using Y=[0,2], then eval(2) is an index past the end of the Y array,
      * and it would return the extrapolated value 4.
      *
      * \param[in] x (double) fractional index or x-value at which to evaluate interpolation
@@ -390,7 +390,7 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public double val(double x) {
+    public double eval(double x) {
         // Evaluate interpolation function at x
 
         double retval;
@@ -454,22 +454,22 @@ public class Interp1d {
 
     /*
      ******************************************************************************
-     * Method Interp1d::valWithWrap()
+     * Method Interp1d::evalWithWrap()
      ******************************************************************************
      *//*!
      * \brief
      * Obtain interpolated value with wrapping.
      *
      * <b> Implementation Details: </b>\n\n
-     * This method behaves the same as val() when the argument lies within
+     * This method behaves the same as eval() when the argument lies within
      * the range of the input data (array length in the case of Y only, or the range of
      * X if specified).
      *
      * If the argument is outside the range, instead of extrapolating, this method
      * will return an interpolated value with wrapping. For example, if constructed
-     * using Y=[0,1,2], then valWithWrap(2.5) is an index past the end of the Y array,
+     * using Y=[0,1,2], then evalWithWrap(2.5) is an index past the end of the Y array,
      * and it would return the interpolated value 1.0 which lies between 2 at index 2 and
-     * the wrapped value 0 index 0. Similarly, valWithWrap(3.5) would return 0.5 as
+     * the wrapped value 0 index 0. Similarly, evalWithWrap(3.5) would return 0.5 as
      * an interpolation between 0 and wrapped index 0, and 1 at wrapped index 1.
      *
      * \param[in] x (double) fractional index or x-value at which to evaluate interpolation
@@ -479,7 +479,7 @@ public class Interp1d {
      * \callgraph
      ******************************************************************************
      */
-    public double valWithWrap(double x) {
+    public double evalWithWrap(double x) {
         // Wrap x to within the range of the interpolation function
         double x_wrapped;
         if (_yOnly) {
@@ -488,7 +488,7 @@ public class Interp1d {
             double xRange = _x_table[_x_table.length-1] - _x_table[0];
             x_wrapped = mod((x - _x_table[0]),xRange) + _x_table[0];
         }
-        return val(x_wrapped);
+        return eval(x_wrapped);
     }
 
 
