@@ -160,6 +160,26 @@ public class Interp1d {
         yOnlyConstructor(y);
     }
 
+
+    /*
+     ******************************************************************************
+     * Method Interp1d::yOnlyConstructor()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Private helper for constructors when only Y values supplied.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The caller provides a vector of regularly-spaced values to be interpolated.
+     * Subsequent calls to val() interpret the argument as fractional array indices.
+     *
+     * \param[in] y (double[]) regularly-spaced values
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     private void yOnlyConstructor(double[] y) throws IllegalArgumentException {
         if (y.length < 2) {
             throw new IllegalArgumentException("Supplied vector must have at least 2 elements");
@@ -204,6 +224,31 @@ public class Interp1d {
     }
 
 
+    /*
+     ******************************************************************************
+     * Method Interp1d::xAndYConstructor()
+     ******************************************************************************
+     *//*!
+     * \brief
+     * Private helper for constructors when both X and Y values supplied.
+     *
+     * <b> Implementation Details: </b>\n\n
+     * The caller provides a list of x- and y-values, as well as indicating
+     * whether the x values are regularly-spaced or not. If the caller asserts
+     * that they are regularly spaced, the first two values of X are used for
+     * linear interpolation of bounding indices. Otherwise, for irregularly-spaced
+     * data, this method will verify that X is monotonically increasing so that
+     * a recursive binary search may be used.
+     *
+     * \param[in] x (double[]) x-coordinates of values to be interpolated
+     * \param[in] y (double[]) y-values to be interpolated
+     * \param[in] regular (boolean) indicate whether data are regularly or irregularly-spaced along x-coordinate
+     *
+     * \return N/A
+     *
+     * \callgraph
+     ******************************************************************************
+     */
     private void xAndYConstructor(double[] x, double[] y, boolean regular) throws IllegalArgumentException, ArithmeticException {
         if (x.length < 2) {
             throw new IllegalArgumentException("Supplied x vector must have at least 2 elements");
@@ -220,11 +265,14 @@ public class Interp1d {
         _regular = regular;
 
         if (_regular) {
-            // used to convert supplied values into array indices
+            // use value of x[0] as a reference, and step size x[1] - x[0] in the
+            // regular case to determine bounding array indices quickly via
+            // linear interpolation
             _x0_table = x[0];
             _dx_table = x[1] - x[0];
         } else {
-            // verify that x values are monotonic when irregularly spaced
+            // when not assuming regularly-spaced x, verify that the values are monotonic
+            // so that we can perform a binary search
             for (int i = 0; i<(_x_table.length-1); ++i) {
                 double x0 = _x_table[i];
                 double x1 = _x_table[i+1];
@@ -265,10 +313,13 @@ public class Interp1d {
         Path file = Paths.get(filename);
         List<String> lines = Files.readAllLines(file, Charset.defaultCharset());
 
+        // These ArrayList objects will be added to dynamically as we parse the file
         ArrayList<Double> xList = new ArrayList<Double>();
         ArrayList<Double> yList = new ArrayList<Double>();
 
         if (twoColumns) {
+            // Parse each line of the file, extracting X and Y values separated
+            // by whitespace using a regex, and then appending to the ArrayList objects.
             for (String line : lines) {
                 String[] elements = line.trim().split("\\s+");
                 if (elements.length == 2) {
@@ -277,6 +328,7 @@ public class Interp1d {
                 }
             }
 
+            // Convert the ArrayList objects into double[] arrays
             double[] x = new double[xList.size()];
             double[] y = new double[yList.size()];
             for (int i=0; i<x.length; ++i) {
@@ -284,8 +336,11 @@ public class Interp1d {
                 y[i] = yList.get(i).doubleValue();
             }
 
+            // Call the xAndYContructor() helper method
             xAndYConstructor(x, y, regular);
         } else {
+            // Parse each line of the file, extracting Y values, and stripping
+            // off whitespace with a regex, and append to the ArrayList object.
             for (String line : lines) {
                 String[] elements = line.trim().split("\\s+");
                 if (elements.length == 1) {
@@ -293,11 +348,13 @@ public class Interp1d {
                 }
             }
 
+            // Convert the ArrayList object into a double[] array
             double[] y = new double[yList.size()];
             for (int i=0; i<y.length; ++i) {
                 y[i] = yList.get(i).doubleValue();;
             }
 
+            // Call the yOnlyConstructor() helper method
             yOnlyConstructor(y);
         }
     }
