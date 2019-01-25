@@ -2,7 +2,7 @@
 # Example top-level Makefile
 #
 
-SUBDIRS := examples
+SUBDIRS := examples java
 SUBDIRSCLEAN = $(addsuffix .clean,$(SUBDIRS))
 
 .PHONY: all $(SUBDIRS)
