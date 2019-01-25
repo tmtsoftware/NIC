@@ -94,7 +94,7 @@ public class Interp1dTest {
 
         // regular
         String xyFile2 = classLoader.getResource("xydata2.txt").getFile();
-        Interp1d t2 = new Interp1d(xyFile2, true, false);
+        Interp1d t2 = new Interp1d(xyFile2, true, true);
         assertEquals(1.0, t2.eval(3.5), epsilon);
 
         // y only
