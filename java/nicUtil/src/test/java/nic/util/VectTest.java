@@ -2,6 +2,8 @@ package nic.util;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class VectTest {
@@ -12,6 +14,21 @@ public class VectTest {
     Vect v3 = new Vect(new double[]{-5,6,0});
 
     @Test
+    public void getters() {
+        // Create a vector from d, then verify that the object returned by
+        // copyOfData() is different, but contains the same values
+        double[] d = new double[]{1,2,3};
+        Vect v = new Vect(d);
+
+        double[] dCopy = v.copyOfData();
+        assertNotEquals(d, dCopy);            // object comparison
+        assertTrue( Arrays.equals(d,dCopy));  // element comparison
+
+        // Check for the correct value at a certain index
+        assertEquals(2.0,v.getElement(1), epsilon);
+    }
+
+    @Test
     public void abs() {
         Vect v = v3.abs();
         Vect expected = new Vect(new double[]{5,6,0});
@@ -20,7 +37,7 @@ public class VectTest {
 
         // Subsequent call should used stored value
         Vect v_again = v3.abs();                // should be same object
-        Vect v_other = (new Vect(v3.getd())).abs();  // different object with same values
+        Vect v_other = (new Vect(v3.copyOfData())).abs();  // different object with same values
 
         assertEquals(v_again, v);
         assertNotEquals( v_again, v_other);     // not same object
@@ -66,6 +83,7 @@ public class VectTest {
         Vect expected = new Vect(new double[]{-2,-1,0});
         assertTrue(v.equals(expected));
     }
+
     @Test
     public void times() {
         Vect v = v1.times(3);

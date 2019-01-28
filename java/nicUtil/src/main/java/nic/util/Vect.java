@@ -43,8 +43,9 @@ import java.util.Optional;
  * This class is used to implement vectors and some common operations.
  *
  * <b> Implementation Details: </b>
- * Vector data are provided as a double[] to the constructor, and are public
- * to allow the user to update and read values as they see fit.
+ * Vector data are provided as a double[] to the constructor, and a copy
+ * of the data may be obtained using the copyOfData() method, or individual
+ * elements via the getElement() method.
  *
  * The following basic vector operations are currently supported:
  *   - abs() to return the element-wise absolute value of a Vector
@@ -202,6 +203,8 @@ public class Vect {
             // same object so we can skip the element-wise test
             result = true;
         } else {
+            result = Arrays.equals(_d,v._d);
+
             if (v._d.length != _d.length) {
                 throw new IllegalArgumentException("Vectors must have the same length.");
             }
@@ -358,7 +361,10 @@ public class Vect {
 
     // --- Simple Getters  ----------------------------------------------------------------------------------------
 
-    /*! @copydoc _d */
-    public double[] getd() { return Arrays.copyOf(_d,_d.length); }
+    /*! Obtain a copy of the Vect data array */
+    public double[] copyOfData() { return Arrays.copyOf(_d,_d.length); }
+
+    /*! Obtain the value stored in the Vect data array at the requested index */
+    public double getElement(int i) { return _d[i]; }
 
 }
