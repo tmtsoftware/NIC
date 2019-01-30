@@ -66,7 +66,7 @@ def targetStr(str):
 ## Generate tag string for both LaTex and HTML output using prefix
 ## specified in the various subsection *_c configuration dictionaries
 def getTag(model_c,name):
-  latex_tag = model_c['tagprefix']+latexStr(name)
+  latex_tag = model_c['tagprefix']+targetStr(name)
   html_tag = model_c['tagprefix']+targetStr(name)
   tagstr = "\latexonly\n\label{"+latex_tag+"}\n\endlatexonly\n" + \
     "\htmlonly<a id="+html_tag+"></a>\endhtmlonly\n"
