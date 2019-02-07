@@ -7,9 +7,39 @@ from pymongo import MongoClient
 import re
 import sys
 
+subsystem_colours = {
+    'aoesw'  : 'green4',
+    'nfiraos': 'springgreen',
+    'tcs'    : 'purple',
+    'iris'   : 'blue'
+}
+
+cmd_pairs = {}        # each entry points to list of events between each unique publisher&receiver
+ev_pairs = {}         # each entry points to list of events between each unique publisher&receiver
+all_nodes = set()     # a set of all nodes that will be plotted
+primary_nodes = set() # nodes for which full information is provided
+cmd_no_sender = {}    # dictionary using prefix as key for commands that nobody sends
+ev_no_publisher = {}  # dictionary using prefix as key for events component subscribes to, nobody publishes
+
+group_subsystem = True
+show_missing_events = True
+show_missing_commands = True
+
+# Define components explicitly
+components = ['iris.oiwfs.poa']#,'iris.rotator','nfiraos.rtc']
+subsystems = None
+
+# Or select all components in subsystems
+#subsystems = set(['iris'])
+
+
+
+
+
 client = MongoClient()
 db = client['icds']
 collection_names = set(db.list_collection_names())
+
 
 # Dictionary maps subsystem -> component -> prefix
 prefix_dict = {}
@@ -95,8 +125,9 @@ for name in collection_names:
                         if subtype not in sub_dict[p]:
                             sub_dict[p][subtype] = set()
                         pubprefix = prefix(item['subsystem'],item['component'])
-                        if not pubprefix:
-                            continue
+                        if pubprefix is None:
+                            # Can't identify the publisher
+                            pubprefix = item['subsystem']+'.'+item['component']
                         sub_dict[p][subtype].add(pubprefix+'.'+item['name'])
                         #print(p,"subscribes to",pubprefix+'.'+item['name'])
 
@@ -140,38 +171,20 @@ for name in collection_names:
                     
 
 
-# Make a plot
+# Make a plot-----------------------------------------------------------------
 dot = Digraph()
 dot.graph_attr['layout']='dot'#'fdp'#'twopi'#'neato'#'circo'#'dot'
-dot.graph_attr['sep']='+20'
+#dot.graph_attr['sep']='+20'
 dot.graph_attr['ratio']='0.5'
 dot.node_attr['fontsize']='20'
 dot.edge_attr['fontsize']='10'
 
-subsystem_colours = {
-    'aoesw'  : 'green',
-    'nfiraos': 'red',
-    'tcs'    : 'purple',
-    'iris'   : 'blue'
-}
-
-cmd_pairs = {}        # each entry points to list of events between each unique publisher&receiver
-ev_pairs = {}         # each entry points to list of events between each unique publisher&receiver
-all_nodes = set()     # a set of all nodes that will be plotted
-primary_nodes = set() # nodes for which full information is provided
-
-group_subsystem = True
-
-# Define components explicitly
-#components = ['iris.oiwfs.poa','iris.rotator','nfiraos.rtc']
-
-# Or select all components in subsystems
-subsystems = set(['iris'])
-components = set()
-for p in all_prefixes:
-    subsystem = p.split('.')[0]
-    if subsystem in subsystems:
-        components.add(p)
+if subsystems:
+    components = set()
+    for p in all_prefixes:
+        subsystem = p.split('.')[0]
+        if subsystem in subsystems:
+            components.add(p)
 
 for p in components:
 
@@ -185,6 +198,8 @@ for p in components:
 
     #-----------------------------------------------------------------------------
 
+    cmds_sent = set()
+
     # edges for all commands sent to component
     for comp in cmd_comp_dict:
         if 'send' in cmd_comp_dict[comp]:
@@ -196,7 +211,18 @@ for p in components:
                         cmd_pairs[pair] = []
                     cmd_pairs[pair].append(c_name)
                     all_nodes.add(comp)
+                    cmds_sent.add(cmd)
                     #dot.edge(comp,p,label=c_name)
+
+    # identify commands that no one sends to this component
+    if p in cmd_comp_dict and 'receive' in cmd_comp_dict[p]:
+        recv = set(cmd_comp_dict[p]['receive'])
+        diff = recv.difference(cmds_sent)
+        if diff:
+            cmd_no_sender[p] = set()
+            for cmd in diff:
+                name = cmd.split('.')[-1]
+                cmd_no_sender[p].add(name)
 
     # edges for all commands sent from component
     if (p in cmd_comp_dict) and ('send' in cmd_comp_dict[p]):
@@ -232,18 +258,26 @@ for p in components:
         for ev in sub_dict[p]['events']:
             if ev in pub_dict['events']:
                 publisher = pub_dict['events'][ev]
-                e_name = ev.split('.')[-1]
-                pair = publisher+','+p
-                if pair not in ev_pairs:
-                    ev_pairs[pair] = []
-                ev_pairs[pair].append(e_name)
-                all_nodes.add(publisher)
-                #dot.edge(publisher,p,label=e_name)
+                if publisher in all_prefixes:
+                    e_name = ev.split('.')[-1]
+                    pair = publisher+','+p
+                    if pair not in ev_pairs:
+                        ev_pairs[pair] = []
+                    ev_pairs[pair].append(e_name)
+                    all_nodes.add(publisher)
+                    #dot.edge(publisher,p,label=e_name)
+            else:
+                # identify required events that no one publishes
+                if p not in ev_no_publisher:
+                    ev_no_publisher[p] = set()
+                name = ev.split('.')[-1]
+                ev_no_publisher[p].add(name)
 
 # ----------------------------------------------------------------------------
 
 def define_nodes(g, nodes, col):
     for node in nodes:
+            # Create nodes for components 
             parts = node.split('.')  
             component = '.'.join(parts[1:])
             if shortlabel:
@@ -255,6 +289,14 @@ def define_nodes(g, nodes, col):
             else:
                 style='dashed'
             g.node(node,label,fontcolor=col,color=col,style=style)
+
+            # Create dummy node for commands nobody sends
+            if show_missing_commands and node in cmd_no_sender:
+                g.node(node+'.cmd_no_sender','?',fontcolor='red',color='red')
+
+            # Create dummy node for required events nobody sends
+            if show_missing_events and node in ev_no_publisher:
+                g.node(node+'.ev_no_publisher','?',fontcolor='red',color='red')
 
 
 # from all_nodes create a dictionary of nodes in each subsystem
@@ -314,17 +356,33 @@ for pair,cmds in cmd_pairs.items():
     cmd_str = '\n'.join(sorted(cmds))
     dot.edge(sender,receiver,label=cmd_str)
 
+# One edge showing all commands nobody sends to each component
+if show_missing_commands:
+    nocmdcol = 'red'
+    dot.attr('edge',fontcolor=nocmdcol)
+    dot.attr('edge',color=nocmdcol)
+    for p,cmds in cmd_no_sender.items():
+        cmd_str = '\n'.join(cmds)
+        dot.edge(p+'.cmd_no_sender',p,label=cmd_str)
+
 # One edge for each unique event publisher,receiver listing all items as the label
 evcol = 'dimgrey'
 dot.attr('edge',fontcolor=evcol)
 dot.attr('edge',color=evcol)
 #dot.attr('edge',style='dotted')
-
 for pair,events in ev_pairs.items():
     publisher,receiver = pair.split(',')
     ev_str = '\n'.join(sorted(events))
     dot.edge(publisher,receiver,label=ev_str)
 
+# One edge showing all events components need but nobody publishes
+if show_missing_events:
+    nocmdcol = 'red'
+    dot.attr('edge',fontcolor=nocmdcol)
+    dot.attr('edge',color=nocmdcol)
+    for p,evs in ev_no_publisher.items():
+        ev_str = '\n'.join(evs)
+        dot.edge(p+'.ev_no_publisher',p,label=ev_str,style='dashed')
 
 # Render the diagram
 #print(dot.source)
