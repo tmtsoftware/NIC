@@ -92,8 +92,11 @@ for name in collection_names:
                             sub_dict[p] = {}
                         if subtype not in sub_dict[p]:
                             sub_dict[p][subtype] = set()
-
-                        sub_dict[p][subtype].add(p+'.'+item['name'])
+                        pubprefix = prefix(item['subsystem'],item['component'])
+                        if not pubprefix:
+                            continue
+                        sub_dict[p][subtype].add(pubprefix+'.'+item['name'])
+                        #print(p,"subscribes to",pubprefix+'.'+item['name'])
 
 # Dictionaries containing mapping of components->commands received and sent, and commands->components that receive
 cmd_comp_dict = {}  # commands received/sent by component
@@ -119,19 +122,64 @@ for name in collection_names:
                     if cmdtype not in cmd_comp_dict[p]:
                         cmd_comp_dict[p][cmdtype] = set()
 
-                    itemName = p+'.'+item['name']
-                    cmd_comp_dict[p][cmdtype].add(itemName)
-                    cmd_dict[itemName] = p
+                    if cmdtype == 'send':
+                        cmdprefix = prefix(item['subsystem'],item['component'])
+                    else:
+                        cmdprefix = p
 
+                    itemName = cmdprefix+'.'+item['name']
+
+                    if cmdtype == 'receive':
+                        cmd_dict[itemName] = p
+
+                    cmd_comp_dict[p][cmdtype].add(itemName)
+                    
 
 
 # Make a plot
 dot = Digraph()
-subsystem = 'IRIS'
-component = 'rotator-assembly'
+dot.graph_attr['layout']='fdp'#'twopi'#'neato'#'circo'
+dot.graph_attr['sep']='+20'
+dot.graph_attr['ratio']='1'
+dot.edge_attr['fontsize']='10'
+
+
+subsystem = 'NFIRAOS'
+component = 'rtcRole'
+
+#subsystem = 'IRIS'
+#component = 'oiwfs-poa-assembly'
 
 p = prefix(subsystem,component)
 dot.node(p)
-      
+
+# edges for all commands sent to component
+for comp in cmd_comp_dict:
+    if 'send' in cmd_comp_dict[comp]:
+        for cmd in cmd_comp_dict[comp]['send']:
+            if (cmd in cmd_dict) and (cmd_dict[cmd] == p):
+                c_name = cmd.split('.')[-1]
+                dot.edge(comp,p,label=c_name,color='black')
+
+# attributes for events
+dot.attr('edge',fontcolor='blue')
+dot.attr('edge',color='blue')
+
+# edges for events that other components subscribe to from this component
+for comp in sub_dict:
+    if 'events' in sub_dict[comp]:
+        for ev in sub_dict[comp]['events']:
+            if (ev in pub_dict['events']) and (pub_dict['events'][ev] == p):
+                e_name = ev.split('.')[-1]
+                dot.edge(p,comp,label=e_name)
+
+# edges for events that this component subscrbes to
+if p in sub_dict and 'events' in sub_dict[p]:
+    for ev in sub_dict[p]['events']:
+        if ev in pub_dict['events']:
+            publisher = pub_dict['events'][ev]
+            e_name = ev.split('.')[-1]
+            dot.edge(publisher,p,label=e_name)
+
 print(dot.source)
 dot.render(view=True)
