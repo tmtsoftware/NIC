@@ -140,14 +140,15 @@ for name in collection_names:
 
 # Make a plot
 dot = Digraph()
-dot.graph_attr['layout']='fdp'#'twopi'#'neato'#'circo'
+dot.graph_attr['layout']='fdp'#'twopi'#'neato'#'circo'#'dot'
 dot.graph_attr['sep']='+20'
-dot.graph_attr['ratio']='1'
-dot.edge_attr['fontsize']='10'
+dot.graph_attr['ratio']='0.5'
+dot.node_attr['fontsize']='8'
+dot.edge_attr['fontsize']='4'
 
 
-subsystem = 'IRIS'
-component = 'is'
+#subsystem = 'IRIS'
+#component = 'is'
 
 #subsystem = 'NFIRAOS'
 #component = 'rtcRole'
@@ -155,12 +156,14 @@ component = 'is'
 #subsystem = 'IRIS'
 #component = 'oiwfs-poa-assembly'
 
-p = prefix(subsystem,component)
-dot.node(p)
+subsystem = 'NFIRAOS'
+component = 'rtc'
 
-# attributes for commands
-dot.attr('edge',fontcolor='black')
-dot.attr('edge',color='black')
+p = prefix(subsystem,component)
+
+#-----------------------------------------------------------------------------
+
+cmd_pairs = {}   # each entry points to list of events between each unique publisher&receiver
 
 # edges for all commands sent to component
 for comp in cmd_comp_dict:
@@ -168,37 +171,73 @@ for comp in cmd_comp_dict:
         for cmd in cmd_comp_dict[comp]['send']:
             if (cmd in cmd_dict) and (cmd_dict[cmd] == p):
                 c_name = cmd.split('.')[-1]
-                dot.edge(comp,p,label=c_name)
+                pair = comp+','+p
+                if pair not in cmd_pairs:
+                    cmd_pairs[pair] = []
+                cmd_pairs[pair].append(c_name)
+                #dot.edge(comp,p,label=c_name)
 
 # edges for all commands sent from component
 if (p in cmd_comp_dict) and ('send' in cmd_comp_dict[p]):
     for cmd in cmd_comp_dict[p]['send']:
         if cmd in cmd_dict:
             c_name = cmd.split('.')[-1]
-            dot.edge(p,cmd_dict[cmd],label=c_name)
+            pair = p+','+cmd_dict[cmd]
+            if pair not in cmd_pairs:
+                cmd_pairs[pair] = []
+            cmd_pairs[pair].append(c_name)
+            #dot.edge(p,cmd_dict[cmd],label=c_name)
         else:
             print('Error: command',cmd,'not in cmd_dict')
 
-# attributes for events
-dot.attr('edge',fontcolor='blue')
-dot.attr('edge',color='blue')
+#-----------------------------------------------------------------------------
 
-# edges for events that other components subscribe to from this component
+ev_pairs = {}   # each entry points to list of events between each unique publisher&receiver
+
+# events that other components subscribe to from this component
 for comp in sub_dict:
     if 'events' in sub_dict[comp]:
         for ev in sub_dict[comp]['events']:
             if (ev in pub_dict['events']) and (pub_dict['events'][ev] == p):
                 e_name = ev.split('.')[-1]
-                dot.edge(p,comp,label=e_name)
+                pair = p+','+comp
+                if pair not in ev_pairs:
+                    ev_pairs[pair] = []
+                ev_pairs[pair].append(e_name)
+                #dot.edge(p,comp,label=e_name)
 
-# edges for events that this component subscrbes to
+# events that this component subscrbes to
 if p in sub_dict and 'events' in sub_dict[p]:
     for ev in sub_dict[p]['events']:
         if ev in pub_dict['events']:
             publisher = pub_dict['events'][ev]
             e_name = ev.split('.')[-1]
-            dot.edge(publisher,p,label=e_name)
+            pair = publisher+','+p
+            if pair not in ev_pairs:
+                ev_pairs[pair] = []
+            ev_pairs[pair].append(e_name)
+            #dot.edge(publisher,p,label=e_name)
+
+# ----------------------------------------------------------------------------
+
+# One edge for each unique command sender,receiver listing all commands in label
+dot.attr('edge',fontcolor='black')
+dot.attr('edge',color='black')
+for pair,cmds in cmd_pairs.items():
+    sender,receiver = pair.split(',')
+    cmd_str = '\n '.join(sorted(cmds))
+    dot.edge(sender,receiver,label=cmd_str)
+
+# One edge for each unique event publisher,receiver listing all items as the label
+dot.attr('edge',fontcolor='blue')
+dot.attr('edge',color='blue')
+for pair,events in ev_pairs.items():
+    publisher,receiver = pair.split(',')
+    ev_str = '\n '.join(sorted(events))
+    dot.edge(publisher,receiver,label=ev_str)
+
 
 # Render the diagram
 print(dot.source)
 dot.render(view=True)
+x=1
