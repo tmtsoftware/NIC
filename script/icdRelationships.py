@@ -127,6 +127,8 @@ for name in collection_names:
                     else:
                         cmdprefix = p
 
+                    if not cmdprefix:
+                        continue
                     itemName = cmdprefix+'.'+item['name']
 
                     if cmdtype == 'receive':
@@ -144,8 +146,11 @@ dot.graph_attr['ratio']='1'
 dot.edge_attr['fontsize']='10'
 
 
-subsystem = 'NFIRAOS'
-component = 'rtcRole'
+subsystem = 'IRIS'
+component = 'is'
+
+#subsystem = 'NFIRAOS'
+#component = 'rtcRole'
 
 #subsystem = 'IRIS'
 #component = 'oiwfs-poa-assembly'
@@ -153,13 +158,26 @@ component = 'rtcRole'
 p = prefix(subsystem,component)
 dot.node(p)
 
+# attributes for commands
+dot.attr('edge',fontcolor='black')
+dot.attr('edge',color='black')
+
 # edges for all commands sent to component
 for comp in cmd_comp_dict:
     if 'send' in cmd_comp_dict[comp]:
         for cmd in cmd_comp_dict[comp]['send']:
             if (cmd in cmd_dict) and (cmd_dict[cmd] == p):
                 c_name = cmd.split('.')[-1]
-                dot.edge(comp,p,label=c_name,color='black')
+                dot.edge(comp,p,label=c_name)
+
+# edges for all commands sent from component
+if (p in cmd_comp_dict) and ('send' in cmd_comp_dict[p]):
+    for cmd in cmd_comp_dict[p]['send']:
+        if cmd in cmd_dict:
+            c_name = cmd.split('.')[-1]
+            dot.edge(p,cmd_dict[cmd],label=c_name)
+        else:
+            print('Error: command',cmd,'not in cmd_dict')
 
 # attributes for events
 dot.attr('edge',fontcolor='blue')
@@ -181,5 +199,6 @@ if p in sub_dict and 'events' in sub_dict[p]:
             e_name = ev.split('.')[-1]
             dot.edge(publisher,p,label=e_name)
 
+# Render the diagram
 print(dot.source)
 dot.render(view=True)
