@@ -158,6 +158,8 @@ ev_pairs = {}         # each entry points to list of events between each unique 
 all_nodes = set()     # a set of all nodes that will be plotted
 primary_nodes = set() # nodes for which full information is provided
 
+group_subsystem = True
+
 #subsystem = 'IRIS'
 #component = 'is'
 
@@ -239,6 +241,21 @@ for componentstr in components:
 
 # ----------------------------------------------------------------------------
 
+def define_nodes(g, nodes, col):
+    for node in nodes:
+            parts = node.split('.')  
+            component = '.'.join(parts[1:])
+            if shortlabel:
+                label = component
+            else:
+                label = node
+            if node in primary_nodes:
+                style='bold'
+            else:
+                style='dashed'
+            g.node(node,label,fontcolor=col,color=col,style=style)
+
+
 # from all_nodes create a dictionary of nodes in each subsystem
 all_subsystems = {}
 for node in all_nodes:
@@ -255,27 +272,22 @@ for subsystem,nodes in all_subsystems.items():
         col = 'grey'
         shortlabel = False
 
-    with dot.subgraph(name='cluster_'+subsystem) as c:
-        c.attr(label=subsystem)
-        c.attr(color=col)
-        c.attr(fontcolor=col)
-        c.attr(fontsize='40')
-        c.attr(style='rounded')
-        c.attr(penwidth='3')
-        c.attr(labelloc='b')
+    if group_subsystem:
+        # Group nodes by subsystem
+        with dot.subgraph(name='cluster_'+subsystem) as c:
+            c.attr(label=subsystem)
+            c.attr(color=col)
+            c.attr(fontcolor=col)
+            c.attr(fontsize='30')
+            c.attr(style='rounded')
+            c.attr(penwidth='3')
+            c.attr(labelloc='b')
 
-        for node in nodes:
-            parts = node.split('.')  
-            component = '.'.join(parts[1:])
-            if shortlabel:
-                label = component
-            else:
-                label = node
-            if node in primary_nodes:
-                style='bold'
-            else:
-                style='dashed'
-            c.node(node,label,fontcolor=col,color=col,style=style)
+            define_nodes(c,nodes,col)
+    else:
+        # No grouping
+        define_nodes(dot, nodes, col)
+        
 
 # declare nodes with correct colour
 #for node in all_nodes:
