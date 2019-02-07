@@ -13,6 +13,7 @@ collection_names = set(db.list_collection_names())
 
 # Dictionary maps subsystem -> component -> prefix
 prefix_dict = {}
+all_prefixes = set()
 for name in collection_names:
     match = re.match('(\w+)\.(.*)\.component',name)
     if match:
@@ -27,6 +28,7 @@ for name in collection_names:
             prefix_dict[subsystem] = {}
 
         prefix_dict[subsystem][component] = component_prefix
+        all_prefixes.add(component_prefix)
         #print("Found: ", subsystem, component, component_prefix)
 
 def prefix(subsystem,component):
@@ -160,24 +162,23 @@ primary_nodes = set() # nodes for which full information is provided
 
 group_subsystem = True
 
-#subsystem = 'IRIS'
-#component = 'is'
+# Define components explicitly
+#components = ['iris.oiwfs.poa','iris.rotator','nfiraos.rtc']
 
-#subsystem = 'NFIRAOS'
-#component = 'rtcRole'
+# Or select all components in subsystems
+subsystems = set(['iris'])
+components = set()
+for p in all_prefixes:
+    subsystem = p.split('.')[0]
+    if subsystem in subsystems:
+        components.add(p)
 
-#subsystem = 'IRIS'
-#component = 'oiwfs-poa-assembly'
+for p in components:
 
-components = [ "IRIS.oiwfs-adc-assembly","IRIS.oiwfs-poa-assembly","IRIS.rotator-assembly"]
-#components = ['IRIS.oiwfs-poa-assembly','IRIS.rotator-assembly','IRIS.is','TCS.cmIRIS','TCS.cmNFIRAOS','NFIRAOS.rtc']
-
-for componentstr in components:
-
-    subsystem,component = componentstr.split('.')
-    p = prefix(subsystem,component)
-    if p is None:
-        print("Error: don't know",componentstr)
+    #subsystem,component = componentstr.split('.')
+    #p = prefix(subsystem,component)
+    if p not in all_prefixes:
+        print("Error: don't know",p)
         continue
     all_nodes.add(p)
     primary_nodes.add(p)
@@ -326,5 +327,5 @@ for pair,events in ev_pairs.items():
 
 
 # Render the diagram
-print(dot.source)
+#print(dot.source)
 dot.render(view=True)
