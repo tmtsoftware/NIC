@@ -91,9 +91,9 @@ for name in collection_names:
                         if p not in sub_dict:
                             sub_dict[p] = {}
                         if subtype not in sub_dict[p]:
-                            sub_dict[p][subtype] = {}
+                            sub_dict[p][subtype] = set()
 
-                        sub_dict[p][subtype] = p+'.'+item['name']
+                        sub_dict[p][subtype].add(p+'.'+item['name'])
 
 # Dictionaries containing mapping of components->commands received and sent, and commands->components that receive
 cmd_comp_dict = {}  # commands received/sent by component
@@ -122,3 +122,16 @@ for name in collection_names:
                     itemName = p+'.'+item['name']
                     cmd_comp_dict[p][cmdtype].add(itemName)
                     cmd_dict[itemName] = p
+
+
+
+# Make a plot
+dot = Digraph()
+subsystem = 'IRIS'
+component = 'rotator-assembly'
+
+p = prefix(subsystem,component)
+dot.node(p)
+      
+print(dot.source)
+dot.render(view=True)
