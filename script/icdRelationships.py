@@ -36,11 +36,12 @@ show_command_labels = False
 show_event_labels = False
 
 # Define components explicitly
-components = ['iris.oiwfs.poa','iris.oiwfs.adc','iris.oiwfs.detector','iris.rotator','iris.imager.odgw']
+#components = ['iris.oiwfs.poa','iris.oiwfs.adc','iris.oiwfs.detector','iris.rotator','iris.imager.odgw']
+components = ['nfiraos.rtc']
 subsystems = None
 
 # Or select all components in subsystems
-#subsystems = set(['nfiraos'])
+#subsystems = set(['tcs'])
 
 
 
@@ -73,14 +74,15 @@ for name in collection_names:
 
 def prefix(subsystem,component):
     # return prefix given subsystem and component
-    retval = None
+    pref = None
+    failed = None
     if subsystem not in prefix_dict:
-        print("Error: don't know subsystem",subsystem)
+        failed = "Error: don't know subsystem "+subsystem
     elif component not in prefix_dict[subsystem]:
-        print("Error: ",component,"not in subsystem",subsystem)
+        failed = "Error: "+component+" not in subsystem "+subsystem
     else:
-         retval = prefix_dict[subsystem][component]
-    return retval
+         pref = prefix_dict[subsystem][component]
+    return pref,failed
     
 
 # Dictionary of all events, telemetry, alarms pointing to components that publish them
@@ -95,8 +97,9 @@ for name in collection_names:
     if match:
         subsystem=match.group(1)
         component=match.group(2)
-        p = prefix(subsystem,component)
-        if not p:
+        p,failed = prefix(subsystem,component)
+        if failed:
+            print('pub events',name,failed)
             continue
         
         collection = db[name]
@@ -117,8 +120,9 @@ for name in collection_names:
     if match:
         subsystem=match.group(1)
         component=match.group(2)
-        p = prefix(subsystem,component)
-        if not p:
+        p,failed = prefix(subsystem,component)
+        if failed:
+            print('sub events',name,failed)
             continue
         
         collection = db[name]
@@ -134,9 +138,10 @@ for name in collection_names:
                             sub_dict[p] = {}
                         if subtype not in sub_dict[p]:
                             sub_dict[p][subtype] = set()
-                        pubprefix = prefix(item['subsystem'],item['component'])
-                        if pubprefix is None:
+                        pubprefix,failed = prefix(item['subsystem'],item['component'])
+                        if failed:
                             # Can't identify the publisher
+                            print("event not published for",p,failed)
                             pubprefix = item['subsystem']+'.'+item['component']
                         sub_dict[p][subtype].add(pubprefix+'.'+item['name'])
                         #print(p,"subscribes to",pubprefix+'.'+item['name'])
@@ -149,8 +154,9 @@ for name in collection_names:
     if match:
         subsystem=match.group(1)
         component=match.group(2)
-        p = prefix(subsystem,component)
-        if not p:
+        p,failed = prefix(subsystem,component)
+        if failed:
+            print('commands',name,failed)
             continue
         
         collection = db[name]
@@ -166,7 +172,7 @@ for name in collection_names:
                         cmd_comp_dict[p][cmdtype] = set()
 
                     if cmdtype == 'send':
-                        cmdprefix = prefix(item['subsystem'],item['component'])
+                        cmdprefix,failed = prefix(item['subsystem'],item['component'])
                     else:
                         cmdprefix = p
 
@@ -197,9 +203,6 @@ if subsystems:
             components.add(p)
 
 for p in components:
-
-    #subsystem,component = componentstr.split('.')
-    #p = prefix(subsystem,component)
     if p not in all_prefixes:
         print("Error: don't know",p)
         continue
