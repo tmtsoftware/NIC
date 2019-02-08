@@ -360,6 +360,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
         help="Write image to file (default=%s)"%str(imagefile) )
     parser.add_argument("--dotfile", default=dotfile, nargs="?",
         help="Write dot source to file (default=%s)"%str(dotfile) )
+    parser.add_argument("--ratio", default=ratio, nargs="?",
+        help="Image aspect ratio (y/x) (default=%s)"%ratio )
     parser.add_argument("--missingevents", default=str(missingevents), nargs="?",
         help="Plot missing events (default=%s)"%str(missingevents) )
     parser.add_argument("--missingcommands", default=str(missingcommands), nargs="?",
@@ -384,6 +386,7 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     showplot = str2bool(args.showplot)
     imagefile = args.imagefile
     dotfile = args.dotfile
+    ratio=args.ratio
     missingevents = str2bool(args.missingevents)
     missingcommands = str2bool(args.missingcommands)
     commandlabels = str2bool(args.commandlabels)
