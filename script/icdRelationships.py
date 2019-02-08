@@ -43,7 +43,7 @@ nocmdcol = 'red'         # missing command colour
 evcol = 'dimgrey'        # event colours
 noevcol = 'red'          # missing event colour
 
-possible_layouts = set(['fdp','twopi','neato','circo','dot'])
+possible_layouts = ['dot','fdp','sfdp','twopi','neato','circo']
 layout = 'dot'
 ratio = '0.5'
 node_fontsize = '20'
@@ -368,6 +368,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
         help="Plot command labels (default=%s)"%str(commandlabels) )
     parser.add_argument("--eventlabels", default=str(eventlabels), nargs="?",
         help="Plot event labels (default=%s)"%str(eventlabels) )
+    parser.add_argument('--layout', default=layout, choices=possible_layouts, nargs="?",
+        help="Dot layout engine (default=%s"%layout)
     args = parser.parse_args()
 
     components = set()
@@ -384,6 +386,9 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     missingcommands = str2bool(args.missingcommands)
     commandlabels = str2bool(args.commandlabels)
     eventlabels = str2bool(args.eventlabels)
+    layout = args.layout
+
+    print("layout",layout)
 
     if not components and not subsystems:
         print("Need to specify at least --components or --subsystems. For help:\n"+\
