@@ -14,6 +14,13 @@ subsystem_colours = {
     'iris'   : 'blue'
 }
 
+cmdcol = 'chocolate'
+nocmdcol = 'red'
+evcol = 'dimgrey'
+nocmdcol = 'red'
+
+layout = 'dot'#'fdp'#'twopi'#'neato'#'circo'#'dot'
+
 cmd_pairs = {}        # each entry points to list of events between each unique publisher&receiver
 ev_pairs = {}         # each entry points to list of events between each unique publisher&receiver
 all_nodes = set()     # a set of all nodes that will be plotted
@@ -23,14 +30,17 @@ ev_no_publisher = {}  # dictionary using prefix as key for events component subs
 
 group_subsystem = True
 show_missing_events = True
-show_missing_commands = True
+show_missing_commands = False
+
+show_command_labels = False
+show_event_labels = False
 
 # Define components explicitly
-components = ['iris.oiwfs.poa']#,'iris.rotator','nfiraos.rtc']
+components = ['iris.oiwfs.poa','iris.oiwfs.adc','iris.oiwfs.detector','iris.rotator','iris.imager.odgw']
 subsystems = None
 
 # Or select all components in subsystems
-#subsystems = set(['iris'])
+#subsystems = set(['nfiraos'])
 
 
 
@@ -173,7 +183,7 @@ for name in collection_names:
 
 # Make a plot-----------------------------------------------------------------
 dot = Digraph()
-dot.graph_attr['layout']='dot'#'fdp'#'twopi'#'neato'#'circo'#'dot'
+dot.graph_attr['layout']=layout
 #dot.graph_attr['sep']='+20'
 dot.graph_attr['ratio']='0.5'
 dot.node_attr['fontsize']='20'
@@ -332,56 +342,49 @@ for subsystem,nodes in all_subsystems.items():
         define_nodes(dot, nodes, col)
         
 
-# declare nodes with correct colour
-#for node in all_nodes:
-#    parts = node.split('.')
-#    subsystem = parts[0]
-#    component = '.'.join(parts[1:])
-    
-    #print(node,subsystem)
-#    if subsystem in subsystem_colours:
-#        col = subsystem_colours[subsystem]
-#        label = component # if colour-coded don't need subsystem in name
-#    else:
-#        col = 'grey'
-#        label = node # if not colour-coded include subsystem
-#    dot.node(node,component,fontcolor=col,color=col)
-
 # One edge for each unique command sender,receiver listing all commands in label
-cmdcol = 'chocolate'
 dot.attr('edge',fontcolor=cmdcol)
 dot.attr('edge',color=cmdcol)
 for pair,cmds in cmd_pairs.items():
     sender,receiver = pair.split(',')
-    cmd_str = '\n'.join(sorted(cmds))
+    if show_command_labels:
+        cmd_str = '\n'.join(sorted(cmds))
+    else:
+        cmd_str = None
     dot.edge(sender,receiver,label=cmd_str)
 
 # One edge showing all commands nobody sends to each component
 if show_missing_commands:
-    nocmdcol = 'red'
     dot.attr('edge',fontcolor=nocmdcol)
     dot.attr('edge',color=nocmdcol)
     for p,cmds in cmd_no_sender.items():
-        cmd_str = '\n'.join(cmds)
+        if show_command_labels:
+            cmd_str = '\n'.join(cmds)
+        else:
+            cmd_str = None
         dot.edge(p+'.cmd_no_sender',p,label=cmd_str)
 
 # One edge for each unique event publisher,receiver listing all items as the label
-evcol = 'dimgrey'
 dot.attr('edge',fontcolor=evcol)
 dot.attr('edge',color=evcol)
 #dot.attr('edge',style='dotted')
 for pair,events in ev_pairs.items():
     publisher,receiver = pair.split(',')
-    ev_str = '\n'.join(sorted(events))
+    if show_event_labels:
+        ev_str = '\n'.join(sorted(events))
+    else:
+        ev_str = None
     dot.edge(publisher,receiver,label=ev_str)
 
 # One edge showing all events components need but nobody publishes
 if show_missing_events:
-    nocmdcol = 'red'
     dot.attr('edge',fontcolor=nocmdcol)
     dot.attr('edge',color=nocmdcol)
     for p,evs in ev_no_publisher.items():
-        ev_str = '\n'.join(evs)
+        if show_event_labels:
+            ev_str = '\n'.join(evs)
+        else:
+            ev_str = None
         dot.edge(p+'.ev_no_publisher',p,label=ev_str,style='dashed')
 
 # Render the diagram
