@@ -32,31 +32,45 @@ import sys
 
 # plotting defaults
 subsystem_colours = {
-    'aoesw'  : 'green4',
-    'nfiraos': 'springgreen',
+    'nfiraos': 'green4',
+    'aoesw'  : 'springgreen',
     'tcs'    : 'purple',
-    'iris'   : 'blue'
+    'iris'   : 'blue',
+    'others' : 'grey'    # colour used for remaining subsystems
 }
+cmdcol = 'chocolate'     # command colour
+nocmdcol = 'red'         # missing command colour
+evcol = 'dimgrey'        # event colours
+noevcol = 'red'          # missing event colour
 
-cmdcol = 'chocolate'
-nocmdcol = 'red'
-evcol = 'dimgrey'
-nocmdcol = 'red'
+layout = 'dot'           # can be one of: 'fdp','twopi','neato','circo','dot'
+ratio = '0.5'
+node_fontsize = '20'
+edge_fontsize = '10'
+subsystem_fontsize = '30'
+group_subsystem = True
+show_missing_events = True
+show_missing_commands = False
+show_command_labels = False
+show_event_labels = False
 
-layout = 'dot'#'fdp'#'twopi'#'neato'#'circo'#'dot'
+# suffixes for dummy nodes
+suffix_nocmd = '.cmd_no_sender'
+suffix_noev = '.ev_no_publisher'
 
-# globals
-prefix_dict = {}
-all_prefixes = set()
-pub_dict = {
+# information parsed from database in read_database()
+prefix_dict = {}      # map subsystem->component->prefix
+all_prefixes = set()  # all component prefixes from the database
+pub_dict = {          # mapping from events,telemetry,alarms->producers
     'events':{},
     'telemetry':{},
     'alarms':{}
     }
-sub_dict = {}
-cmd_comp_dict = {}  # commands received/sent by component
-cmd_dict = {}       # mapping of all commands to the components that receive them
+sub_dict = {}         # mapping from component prefixes->all subscribed items
+cmd_comp_dict = {}    # commands received/sent by component
+cmd_dict = {}         # mapping of all commands to the components that receive them
 
+# global information built when preparing for plot
 cmd_pairs = {}        # each entry points to list of events between each unique publisher&receiver
 ev_pairs = {}         # each entry points to list of events between each unique publisher&receiver
 all_nodes = set()     # a set of all nodes that will be plotted
@@ -64,12 +78,7 @@ primary_nodes = set() # nodes for which full information is provided
 cmd_no_sender = {}    # dictionary using prefix as key for commands that nobody sends
 ev_no_publisher = {}  # dictionary using prefix as key for events component subscribes to, nobody publishes
 
-group_subsystem = True
-show_missing_events = True
-show_missing_commands = False
 
-show_command_labels = False
-show_event_labels = False
 
 # Define components explicitly
 #components = ['iris.oiwfs.poa','iris.oiwfs.adc','iris.oiwfs.detector','iris.rotator','iris.imager.odgw']
@@ -77,11 +86,26 @@ components = ['nfiraos.rtc']
 subsystems = None
 
 # Or select all components in subsystems
-#subsystems = set(['tcs'])
+subsystems = set(['nfiraos'])
 
-
+# *****************************************************************************
 def prefix(subsystem,component):
-    # return prefix given subsystem and component
+    """ Establish prefix given subsystem and component
+
+    Model files specify subsystem and component names. However,
+    these do not necessarily need to match the prefix
+    of a component. That mapping is provided by the component-model.conf
+    which specifies the component prefix. This routine makes
+    use of the global prefix_dict to get the prefix
+
+    Args:
+        subsystem (str): subsystem name from model files
+        component (str): component name from model files
+
+    Returns:
+        pref (str): The prefix if successful, error message if it failed
+        failed (bool): Flag is True if it failed
+    """
     pref = None
     failed = None
     if subsystem not in prefix_dict:
@@ -92,14 +116,26 @@ def prefix(subsystem,component):
          pref = prefix_dict[subsystem][component]
     return pref,failed
 
+# *****************************************************************************
 # read database
 def read_database():
+    """ Read information from the database into globals
+
+    Connect to the database and populate the following globals:
+    prefix_dict, all_prefixes, pub_dict, sub_dict, cmd_comp_dict, cmd_dict
+    """
+
     client = MongoClient()
     db = client['icds']
+
+    # Each collection corresponds to an individual model file. The
+    # name of each collection is of the form:
+    #  (subsystem).(component).(modelfiletype)
     collection_names = set(db.list_collection_names())
 
     # Dictionary maps subsystem -> component -> prefix
     for name in collection_names:
+        # We get the prefixes out of the component-model files
         match = re.match('(\w+)\.(.*)\.component',name)
         if match:
             subsystem=match.group(1)
@@ -116,10 +152,10 @@ def read_database():
             all_prefixes.add(component_prefix)
             #print("Found: ", subsystem, component, component_prefix)
 
-    
-
-    # Dictionary of all events, telemetry, alarms pointing to components that publish them
+    # Dictionary of all events, telemetry, alarms pointing to
+    # components that publish them
     for name in collection_names:
+        # Extract this information from the publish-model files
         match = re.match('(\w+)\.(.*)\.publish',name)
         if match:
             subsystem=match.group(1)
@@ -142,6 +178,7 @@ def read_database():
                         
     # Dictionary of all events, telemetry subscribed to by each component
     for name in collection_names:
+        # Extract this information from the subscribe-model files
         match = re.match('(\w+)\.(.*)\.subscribe',name)
         if match:
             subsystem=match.group(1)
@@ -174,6 +211,7 @@ def read_database():
 
     # Dictionaries containing mapping of components->commands received and sent, and commands->components that receive
     for name in collection_names:
+        # Extract this information from the command-model files
         match = re.match('(\w+)\.(.*)\.command',name)
         if match:
             subsystem=match.group(1)
@@ -209,9 +247,23 @@ def read_database():
 
                         cmd_comp_dict[p][cmdtype].add(itemName)
                         
+# *****************************************************************************
+def define_nodes(g, nodes, col, shortlabel):
+    """ Define nodes in a graph
 
-# Define individual nodes within subsystems
-def define_nodes(g, nodes, col):
+    Add supplied nodes to the supplied graph.
+    Primary nodes and secondary nodes have a different style.
+    The subroutine will also create dummy nodes corresponding to
+    any node that has missing commands/events.
+
+    This routine may be called on a subgraph.
+
+    Args:
+        g (Digraph): graph object for which nodes are being defined
+        nodes (iterable): list of node prefixes
+        col (str): colour for the nodes
+        shortlabel (bool): if true just component label instead of full prefix
+    """
     for node in nodes:
             # Create nodes for components 
             parts = node.split('.')  
@@ -228,25 +280,20 @@ def define_nodes(g, nodes, col):
 
             # Create dummy node for commands nobody sends
             if show_missing_commands and node in cmd_no_sender:
-                g.node(node+'.cmd_no_sender','?',fontcolor='red',color='red')
+                g.node(node+suffix_nocmd,'?',fontcolor=nocmdcol,color=nocmdcol)
 
             # Create dummy node for required events nobody sends
             if show_missing_events and node in ev_no_publisher:
-                g.node(node+'.ev_no_publisher','?',fontcolor='red',color='red')
+                g.node(node+suffix_noev,'?',fontcolor=noevcol,color=noevcol)
 
 
-# Entrypoint -----------------------------------------------------------------
+# *****************************************************************************
+# Entrypoint
 
 if __name__ == '__main__':
 
+    # Populate globals with information from the database
     read_database()
-
-    dot = Digraph()
-    dot.graph_attr['layout']=layout
-    #dot.graph_attr['sep']='+20'
-    dot.graph_attr['ratio']='0.5'
-    dot.node_attr['fontsize']='20'
-    dot.edge_attr['fontsize']='10'
 
     if subsystems:
         components = set()
@@ -255,6 +302,9 @@ if __name__ == '__main__':
             if subsystem in subsystems:
                 components.add(p)
 
+    # ***************************************************************
+    # Iterate over primary components and establish all of the 
+    # relationships required to make the plots
     for p in components:
         if p not in all_prefixes:
             print("Error: don't know",p)
@@ -262,11 +312,9 @@ if __name__ == '__main__':
         all_nodes.add(p)
         primary_nodes.add(p)
 
-        #-----------------------------------------------------------------------------
-
-        cmds_sent = set()
-
+        # *************************************************
         # edges for all commands sent to component
+        cmds_sent = set()
         for comp in cmd_comp_dict:
             if 'send' in cmd_comp_dict[comp]:
                 for cmd in cmd_comp_dict[comp]['send']:
@@ -280,6 +328,7 @@ if __name__ == '__main__':
                         cmds_sent.add(cmd)
                         #dot.edge(comp,p,label=c_name)
 
+        # *************************************************
         # identify commands that no one sends to this component
         if p in cmd_comp_dict and 'receive' in cmd_comp_dict[p]:
             recv = set(cmd_comp_dict[p]['receive'])
@@ -290,6 +339,7 @@ if __name__ == '__main__':
                     name = cmd.split('.')[-1]
                     cmd_no_sender[p].add(name)
 
+        # *************************************************
         # edges for all commands sent from component
         if (p in cmd_comp_dict) and ('send' in cmd_comp_dict[p]):
             for cmd in cmd_comp_dict[p]['send']:
@@ -304,9 +354,9 @@ if __name__ == '__main__':
                 else:
                     print('Error: command',cmd,'not in cmd_dict')
 
-        #-----------------------------------------------------------------------------
-
-        # events that other components subscribe to from this component
+        # *************************************************
+        # events that other components subscribe to from
+        # this component
         for comp in sub_dict:
             if 'events' in sub_dict[comp]:
                 for ev in sub_dict[comp]['events']:
@@ -319,6 +369,7 @@ if __name__ == '__main__':
                         all_nodes.add(comp)
                         #dot.edge(p,comp,label=e_name)
 
+        # *************************************************
         # events that this component subscrbes to
         if p in sub_dict and 'events' in sub_dict[p]:
             for ev in sub_dict[p]['events']:
@@ -339,9 +390,7 @@ if __name__ == '__main__':
                     name = ev.split('.')[-1]
                     ev_no_publisher[p].add(name)
 
-    # ----------------------------------------------------------------------------
-
-
+    # ***************************************************************
     # from all_nodes create a dictionary of nodes in each subsystem
     all_subsystems = {}
     for node in all_nodes:
@@ -350,12 +399,30 @@ if __name__ == '__main__':
             all_subsystems[subsystem] = set()
         all_subsystems[subsystem].add(node)
 
+    # ***************************************************************
+    # Create the graph
+
+    # Graph initialization
+    dot = Digraph()
+    dot.graph_attr['layout']=layout
+    #dot.graph_attr['sep']='+20'
+    dot.graph_attr['ratio']=ratio
+    dot.node_attr['fontsize']=node_fontsize
+    dot.edge_attr['fontsize']=edge_fontsize
+
+
+    # Define all of the nodes
     for subsystem,nodes in all_subsystems.items():
         if subsystem in subsystem_colours:
             col = subsystem_colours[subsystem]
             shortlabel = True
         else:
-            col = 'grey'
+            # use a single colour for subsystems
+            # that don't have a specific colour,
+            # and also revert to specifying
+            # full prefix for nodes in those
+            # subsystems instead of the short name
+            col = subsystem_colours['others']
             shortlabel = False
 
         if group_subsystem:
@@ -364,15 +431,15 @@ if __name__ == '__main__':
                 c.attr(label=subsystem)
                 c.attr(color=col)
                 c.attr(fontcolor=col)
-                c.attr(fontsize='30')
+                c.attr(fontsize=subsystem_fontsize)
                 c.attr(style='rounded')
                 c.attr(penwidth='3')
                 c.attr(labelloc='b')
 
-                define_nodes(c,nodes,col)
+                define_nodes(c,nodes,col,shortlabel)
         else:
             # No grouping
-            define_nodes(dot, nodes, col)
+            define_nodes(dot, nodes, col,shortlabel)
             
 
     # One edge for each unique command sender,receiver listing all commands in label
@@ -386,7 +453,8 @@ if __name__ == '__main__':
             cmd_str = None
         dot.edge(sender,receiver,label=cmd_str)
 
-    # One edge showing all commands nobody sends to each component
+    # One edge showing all commands nobody sends to each component,
+    # using dummy nodes as the source
     if show_missing_commands:
         dot.attr('edge',fontcolor=nocmdcol)
         dot.attr('edge',color=nocmdcol)
@@ -395,7 +463,7 @@ if __name__ == '__main__':
                 cmd_str = '\n'.join(cmds)
             else:
                 cmd_str = None
-            dot.edge(p+'.cmd_no_sender',p,label=cmd_str)
+            dot.edge(p+suffix_nocmd,p,label=cmd_str)
 
     # One edge for each unique event publisher,receiver listing all items as the label
     dot.attr('edge',fontcolor=evcol)
@@ -409,7 +477,8 @@ if __name__ == '__main__':
             ev_str = None
         dot.edge(publisher,receiver,label=ev_str)
 
-    # One edge showing all events components need but nobody publishes
+    # One edge showing all events components need but nobody publishes,
+    # using dummy nodes as the source
     if show_missing_events:
         dot.attr('edge',fontcolor=nocmdcol)
         dot.attr('edge',color=nocmdcol)
@@ -418,7 +487,7 @@ if __name__ == '__main__':
                 ev_str = '\n'.join(evs)
             else:
                 ev_str = None
-            dot.edge(p+'.ev_no_publisher',p,label=ev_str,style='dashed')
+            dot.edge(p+suffix_noev,p,label=ev_str,style='dashed')
 
     # Render the diagram
     #print(dot.source)
