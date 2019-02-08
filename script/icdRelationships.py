@@ -319,7 +319,7 @@ if __name__ == '__main__':
     # parse the command line
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Graph relationships stored in ICDDB",
+        description="Use graphviz dot to graph relationships stored in TMT ICDDB",
         epilog="""The following colours are currently hard-coded:
 
   commands - %s
@@ -386,7 +386,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     eventlabels = str2bool(args.eventlabels)
 
     if not components and not subsystems:
-        print("Neither --components nor --subsystems specified. Exiting.")
+        print("Need to specify at least --components or --subsystems. For help:\n"+\
+            "  icdRelationships.py -h")
         sys.exit(0)
 
     # Populate globals with information from the database
