@@ -43,16 +43,20 @@ nocmdcol = 'red'         # missing command colour
 evcol = 'dimgrey'        # event colours
 noevcol = 'red'          # missing event colour
 
-layout = 'dot'           # can be one of: 'fdp','twopi','neato','circo','dot'
+possible_layouts = set(['fdp','twopi','neato','circo','dot'])
+layout = 'dot'
 ratio = '0.5'
 node_fontsize = '20'
 edge_fontsize = '10'
 subsystem_fontsize = '30'
 group_subsystem = True
-show_missing_events = True
-show_missing_commands = False
-show_command_labels = False
-show_event_labels = False
+showplot = True
+imagefile = None
+dotfile = None
+missingevents = True    # plot missing events?
+missingcommands = False # plot missing commands?
+commandlabels = False   # show command labels?
+eventlabels = False     # show event labels?
 
 # suffixes for dummy nodes
 suffix_nocmd = '.cmd_no_sender'
@@ -78,15 +82,6 @@ primary_nodes = set() # nodes for which full information is provided
 cmd_no_sender = {}    # dictionary using prefix as key for commands that nobody sends
 ev_no_publisher = {}  # dictionary using prefix as key for events component subscribes to, nobody publishes
 
-
-
-# Define components explicitly
-#components = ['iris.oiwfs.poa','iris.oiwfs.adc','iris.oiwfs.detector','iris.rotator','iris.imager.odgw']
-components = ['nfiraos.rtc']
-subsystems = None
-
-# Or select all components in subsystems
-subsystems = set(['nfiraos'])
 
 # *****************************************************************************
 def prefix(subsystem,component):
@@ -279,24 +274,126 @@ def define_nodes(g, nodes, col, shortlabel):
             g.node(node,label,fontcolor=col,color=col,style=style)
 
             # Create dummy node for commands nobody sends
-            if show_missing_commands and node in cmd_no_sender:
+            if missingcommands and node in cmd_no_sender:
                 g.node(node+suffix_nocmd,'?',fontcolor=nocmdcol,color=nocmdcol)
 
             # Create dummy node for required events nobody sends
-            if show_missing_events and node in ev_no_publisher:
+            if missingevents and node in ev_no_publisher:
                 g.node(node+suffix_noev,'?',fontcolor=noevcol,color=noevcol)
 
+# *****************************************************************************
+def str2bool(s):
+    """Convert a string into a Bool
+
+    Converts "true" , "y", "1" to True
+             false" , "n", "0" to False
+
+    Case is ignored.
+
+    Args:
+        s (str): Input string
+
+    Returns:
+        Bool: converted value
+    """
+
+    retval = None
+
+    truestr = set(['true','y','1'])
+    falsestr = set(['false','n','0'])
+    
+    if s.lower() in truestr:
+        retval = True
+    elif s.lower() in falsestr:
+        retval = False
+    else:
+        raise Exception('Unable to convert "'+s+'" to a Boolean (try "True" or "False")')
+
+    return retval
 
 # *****************************************************************************
 # Entrypoint
 
 if __name__ == '__main__':
 
+    # parse the command line
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Graph relationships stored in ICDDB",
+        epilog="""The following colours are currently hard-coded:
+
+  commands - %s
+  events - %s
+  missing commands - %s
+  missing events - %s
+%s
+        
+Examples:
+
+# Plot all interfaces for a particular component to the screen,
+# label events and commands, and show missing events and commands
+
+icdRelationships.py --components iris.oiwfs.poa --missingcommands true \
+    --missingevents true --commandlabels true --eventlabels true
+
+# Plot all interfaces for two components only to a file called graph.pdf
+
+icdRelationships.py --components iris.oiwfs.poa,iris.rotator --imagefile graph \
+    --showplot False
+
+# Plot all interfaces for multiple subsystems and one component from
+# another subsystem to screen, with no missing events shown
+
+icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
+    --missingevents false
+
+""" % (cmdcol,evcol,nocmdcol,noevcol, \
+    'subsystems:\n'+'\n'.join(['    '+k+' - '+v for k,v in subsystem_colours.items()])
+    ))
+    parser.add_argument("--components", type=str, nargs="?",
+        help="Comma-separated list of primary component prefixes")
+    parser.add_argument("--subsystems", type=str, nargs="?",
+        help="Comma-separated list of subsystem prefixes")
+    parser.add_argument("--showplot", default=str(showplot), nargs="?",
+        help="Display plot in a window (default=%s)"%str(showplot) )
+    parser.add_argument("--imagefile", default=imagefile, nargs="?",
+        help="Write image to file (default=%s)"%str(imagefile) )
+    parser.add_argument("--dotfile", default=dotfile, nargs="?",
+        help="Write dot source to file (default=%s)"%str(dotfile) )
+    parser.add_argument("--missingevents", default=str(missingevents), nargs="?",
+        help="Plot missing events (default=%s)"%str(missingevents) )
+    parser.add_argument("--missingcommands", default=str(missingcommands), nargs="?",
+        help="Plot missing commands (default=%s)"%str(missingcommands) )
+    parser.add_argument("--commandlabels", default=str(commandlabels), nargs="?",
+        help="Plot command labels (default=%s)"%str(commandlabels) )
+    parser.add_argument("--eventlabels", default=str(eventlabels), nargs="?",
+        help="Plot event labels (default=%s)"%str(eventlabels) )
+    args = parser.parse_args()
+
+    components = set()
+    subsystems = set()
+    
+    if args.components:
+        components = components.union(args.components.split(','))
+    if args.subsystems:
+        subsystems = subsystems.union(args.subsystems.split(','))
+    showplot = str2bool(args.showplot)
+    imagefile = args.imagefile
+    dotfile = args.dotfile
+    missingevents = str2bool(args.missingevents)
+    missingcommands = str2bool(args.missingcommands)
+    commandlabels = str2bool(args.commandlabels)
+    eventlabels = str2bool(args.eventlabels)
+
+    if not components and not subsystems:
+        print("Neither --components nor --subsystems specified. Exiting.")
+        sys.exit(0)
+
     # Populate globals with information from the database
     read_database()
 
+    # Add components from user-specified subsystems
     if subsystems:
-        components = set()
         for p in all_prefixes:
             subsystem = p.split('.')[0]
             if subsystem in subsystems:
@@ -447,7 +544,7 @@ if __name__ == '__main__':
     dot.attr('edge',color=cmdcol)
     for pair,cmds in cmd_pairs.items():
         sender,receiver = pair.split(',')
-        if show_command_labels:
+        if commandlabels:
             cmd_str = '\n'.join(sorted(cmds))
         else:
             cmd_str = None
@@ -455,11 +552,11 @@ if __name__ == '__main__':
 
     # One edge showing all commands nobody sends to each component,
     # using dummy nodes as the source
-    if show_missing_commands:
+    if missingcommands:
         dot.attr('edge',fontcolor=nocmdcol)
         dot.attr('edge',color=nocmdcol)
         for p,cmds in cmd_no_sender.items():
-            if show_command_labels:
+            if commandlabels:
                 cmd_str = '\n'.join(cmds)
             else:
                 cmd_str = None
@@ -471,7 +568,7 @@ if __name__ == '__main__':
     #dot.attr('edge',style='dotted')
     for pair,events in ev_pairs.items():
         publisher,receiver = pair.split(',')
-        if show_event_labels:
+        if eventlabels:
             ev_str = '\n'.join(sorted(events))
         else:
             ev_str = None
@@ -479,16 +576,22 @@ if __name__ == '__main__':
 
     # One edge showing all events components need but nobody publishes,
     # using dummy nodes as the source
-    if show_missing_events:
+    if missingevents:
         dot.attr('edge',fontcolor=nocmdcol)
         dot.attr('edge',color=nocmdcol)
         for p,evs in ev_no_publisher.items():
-            if show_event_labels:
+            if eventlabels:
                 ev_str = '\n'.join(evs)
             else:
                 ev_str = None
             dot.edge(p+suffix_noev,p,label=ev_str,style='dashed')
 
     # Render the diagram
-    #print(dot.source)
-    dot.render(view=True)
+    if showplot or imagefile:
+        dot.render(cleanup=True,view=showplot,filename=imagefile)
+    else:
+        print("Neither --showplot nor --imagefile specified, no plot generated")
+
+    if dotfile:
+        with open(dotfile,'w') as f:
+            f.write(dot.source)
