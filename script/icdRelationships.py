@@ -49,7 +49,7 @@ ratio = '0.5'
 node_fontsize = '20'
 edge_fontsize = '10'
 subsystem_fontsize = '30'
-group_subsystem = True
+groupsubsystems = True
 showplot = True
 imagefile = None
 dotfile = None
@@ -368,6 +368,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
         help="Plot command labels (default=%s)"%str(commandlabels) )
     parser.add_argument("--eventlabels", default=str(eventlabels), nargs="?",
         help="Plot event labels (default=%s)"%str(eventlabels) )
+    parser.add_argument("--groupsubsystems", default=str(groupsubsystems), nargs="?",
+        help="Group components from same subsystem together (default=%s)"%str(groupsubsystems) )
     parser.add_argument('--layout', default=layout, choices=possible_layouts, nargs="?",
         help="Dot layout engine (default=%s"%layout)
     args = parser.parse_args()
@@ -386,9 +388,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     missingcommands = str2bool(args.missingcommands)
     commandlabels = str2bool(args.commandlabels)
     eventlabels = str2bool(args.eventlabels)
+    groupsubsystems = str2bool(args.groupsubsystems)
     layout = args.layout
-
-    print("layout",layout)
 
     if not components and not subsystems:
         print("Need to specify at least --components or --subsystems. For help:\n"+\
@@ -528,7 +529,7 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
             col = subsystem_colours['others']
             shortlabel = False
 
-        if group_subsystem:
+        if groupsubsystems:
             # Group nodes by subsystem
             with dot.subgraph(name='cluster_'+subsystem) as c:
                 c.attr(label=subsystem)
