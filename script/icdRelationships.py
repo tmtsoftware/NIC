@@ -43,7 +43,7 @@ nocmdcol = 'red'         # missing command colour
 evcol = 'dimgrey'        # event colours
 noevcol = 'red'          # missing event colour
 
-possible_layouts = ['dot','fdp','sfdp','twopi','neato','circo']
+possible_layouts = ['dot','fdp','sfdp','twopi','neato','circo','patchwork']
 layout = 'dot'
 ratio = '0.5'
 node_fontsize = '20'
@@ -56,7 +56,9 @@ dotfile = None
 missingevents = True    # plot missing events?
 missingcommands = False # plot missing commands?
 commandlabels = False   # show command labels?
-eventlabels = False     # show event labels?
+eventlabels = True      # show event labels?
+splines = True          # use splines for edges?
+overlap = 'scale'
 
 # suffixes for dummy nodes
 suffix_nocmd = '.cmd_no_sender'
@@ -333,18 +335,18 @@ Examples:
 # Plot all interfaces for a particular component to the screen,
 # label events and commands, and show missing events and commands
 
-icdRelationships.py --components iris.oiwfs.poa --missingcommands true \
+icdRelationships.py --components iris.oiwfs.poa --missingcommands true \\
     --missingevents true --commandlabels true --eventlabels true
 
 # Plot all interfaces for two components only to a file called graph.pdf
 
-icdRelationships.py --components iris.oiwfs.poa,iris.rotator --imagefile graph \
+icdRelationships.py --components iris.oiwfs.poa,iris.rotator --imagefile graph \\
     --showplot False
 
 # Plot all interfaces for multiple subsystems and one component from
 # another subsystem to screen, with no missing events shown
 
-icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
+icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \\
     --missingevents false
 
 """ % (cmdcol,evcol,nocmdcol,noevcol, \
@@ -373,7 +375,13 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     parser.add_argument("--groupsubsystems", default=str(groupsubsystems), nargs="?",
         help="Group components from same subsystem together (default=%s)"%str(groupsubsystems) )
     parser.add_argument('--layout', default=layout, choices=possible_layouts, nargs="?",
-        help="Dot layout engine (default=%s"%layout)
+        help="Dot layout engine (default=%s)"%layout)
+    parser.add_argument('--overlap', default=layout, choices=['true','false','scale'], nargs="?",
+        help="Node overlap handling (default=%s)"%overlap)
+    parser.add_argument("--splines", default=str(splines), nargs="?",
+        help="Use splines for edges? (default=%s)"%str(splines) )
+    
+
     args = parser.parse_args()
 
     components = set()
@@ -393,6 +401,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     eventlabels = str2bool(args.eventlabels)
     groupsubsystems = str2bool(args.groupsubsystems)
     layout = args.layout
+    overlap = args.overlap
+    splines = args.splines
 
     if not components and not subsystems:
         print("Need to specify at least --components or --subsystems. For help:\n"+\
@@ -512,6 +522,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \
     # Graph initialization
     dot = Digraph()
     dot.graph_attr['layout']=layout
+    dot.graph_attr['splines']=splines
+    dot.graph_attr['overlap']=overlap
     #dot.graph_attr['sep']='+20'
     dot.graph_attr['ratio']=ratio
     dot.node_attr['fontsize']=node_fontsize
