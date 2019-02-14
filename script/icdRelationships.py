@@ -59,6 +59,8 @@ commandlabels = False   # show command labels?
 eventlabels = True      # show event labels?
 splines = True          # use splines for edges?
 overlap = 'scale'
+possible_types = ['HCD', 'Assembly', 'Sequencer', 'Application']
+omittypes = set(['HCD'])
 
 # suffixes for dummy nodes
 suffix_nocmd = '.cmd_no_sender'
@@ -83,7 +85,7 @@ all_nodes = set()     # a set of all nodes that will be plotted
 primary_nodes = set() # nodes for which full information is provided
 cmd_no_sender = {}    # dictionary using prefix as key for commands that nobody sends
 ev_no_publisher = {}  # dictionary using prefix as key for events component subscribes to, nobody publishes
-
+component_types = {}  # dictionary using prefix as key for component types
 
 # *****************************************************************************
 def prefix(subsystem,component):
@@ -140,12 +142,15 @@ def read_database():
 
             collection = db[name]
             cursor = collection.find()
-            component_prefix = cursor.next()['prefix']
+            datadict = cursor.next()
+            component_prefix = datadict['prefix']
+            component_type = datadict['componentType'] #HCD, Assembly, Sequencer, Application
 
             if subsystem not in prefix_dict:
                 prefix_dict[subsystem] = {}
 
             prefix_dict[subsystem][component] = component_prefix
+            component_types[component_prefix] = component_type
             all_prefixes.add(component_prefix)
             #print("Found: ", subsystem, component, component_prefix)
 
@@ -322,7 +327,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         description="Use graphviz dot to graph relationships stored in TMT ICDDB",
-        epilog="""The following colours are currently hard-coded:
+        epilog="""All components specified through the --components or --subsystems arguments
+are considered "primary" nodes and indicated with solid ovals. Any other
+component that they communicate with is a "secondary" node, and will be shown
+with a dashed oval.
+        
+The following colours are currently hard-coded:
 
   commands - %s
   events - %s
@@ -340,14 +350,18 @@ icdRelationships.py --components iris.oiwfs.poa --missingcommands true \\
 
 # Plot all interfaces for two components only to a file called graph.pdf
 
-icdRelationships.py --components iris.oiwfs.poa,iris.rotator --imagefile graph \\
-    --showplot False
+icdRelationships.py --components iris.oiwfs.poa,iris.rotator \\
+    --imagefile graph --showplot false
 
 # Plot all interfaces for multiple subsystems and one component from
 # another subsystem to screen, with no missing events shown
 
 icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \\
     --missingevents false
+
+# Use "neato" layout to get a more readable graph with a lot of nodes
+icdRelationships.py --subsystems iris --layout neato --eventlabels false \\
+    --overlap false
 
 """ % (cmdcol,evcol,nocmdcol,noevcol, \
     'subsystems:\n'+'\n'.join(['    '+k+' - '+v for k,v in subsystem_colours.items()])
@@ -376,11 +390,13 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \\
         help="Group components from same subsystem together (default=%s)"%str(groupsubsystems) )
     parser.add_argument('--layout', default=layout, choices=possible_layouts, nargs="?",
         help="Dot layout engine (default=%s)"%layout)
-    parser.add_argument('--overlap', default=layout, choices=['true','false','scale'], nargs="?",
+    parser.add_argument('--overlap', default=overlap, choices=['true','false','scale'], nargs="?",
         help="Node overlap handling (default=%s)"%overlap)
     parser.add_argument("--splines", default=str(splines), nargs="?",
         help="Use splines for edges? (default=%s)"%str(splines) )
-    
+    parser.add_argument("--omittypes", default=','.join(omittypes), type=str, nargs="?",
+        help="Comma-separated list of component types (%s) to omit as primaries (default=%s)" % \
+            (','.join(possible_types),omittypes) ) 
 
     args = parser.parse_args()
 
@@ -403,6 +419,8 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \\
     layout = args.layout
     overlap = args.overlap
     splines = args.splines
+    if args.omittypes:
+        omittypes = set(args.omittypes.split(','))
 
     if not components and not subsystems:
         print("Need to specify at least --components or --subsystems. For help:\n"+\
@@ -418,6 +436,10 @@ icdRelationships.py --components iris.rotator --subsystems nfiraos,tcs \\
             subsystem = p.split('.')[0]
             if subsystem in subsystems:
                 components.add(p)
+
+    # Remove primary components if they are in omittypes
+    if omittypes:
+        components = {c for c in components if component_types[c] not in omittypes}
 
     # ***************************************************************
     # Iterate over primary components and establish all of the 
