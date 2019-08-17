@@ -7,18 +7,26 @@
 # vars
 ####################
 
+# get datestamp
 DATE = $(shell date +%F)
+
+####################
+
+# current git project root, not necessarily NIC
+PROJ_ROOT := $(shell git rev-parse --show-toplevel)
+
+ifndef NIC
+NIC := ${PROJ_ROOT}/../NIC
+endif
 
 ####################
 # functions
 ####################
 
 # public function for preparing .sec files for doxygen
-#	NIC - path to head of NIC project
 #	SUBSYSTEM - subsystem name, e.g. NFIRAOS, IRIS
 #	COMP_NAME - name of component, e.g. DM Assembly
 define nic_doxygen_sec
-	$(if ${NIC},,$(error NIC not defined))
 	$(if ${SUBSYSTEM},,$(error SUBSYSTEM not defined))
 	$(if ${COMP_NAME},,$(error COMP_NAME not defined))
  	# create directories
@@ -55,7 +63,7 @@ define nic_doxygen_pdf
 	# Generate PDF output
 	cd latex; make pdf; cp refman.pdf ../${COMP}_${DOC_TYPE}_${DATE}.pdf
 	# create symbolic link to the current tech note
-	ln -sf ${COMP}_$1_${DATE}.pdf ./${COMP}_${DOC_TYPE}_current.pdf
+	ln -sf ${COMP}_${DOC_TYPE}_${DATE}.pdf ./${COMP}_${DOC_TYPE}_current.pdf
 	# Prints the first 20 line of the error file
 	head -n 20 doxygen.errLog
 	#firefox html/index.html &
