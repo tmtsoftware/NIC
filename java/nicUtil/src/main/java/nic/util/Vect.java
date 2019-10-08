@@ -204,17 +204,6 @@ public class Vect {
             result = true;
         } else {
             result = Arrays.equals(_d,v._d);
-
-            if (v._d.length != _d.length) {
-                throw new IllegalArgumentException("Vectors must have the same length.");
-            }
-            // Check element-wise equality
-            for (int i = 0; i < _d.length; ++i) {
-                if (_d[i] != v._d[i]) {
-                    result = false;
-                    break;
-                }
-            }
         }
         return result;
     }

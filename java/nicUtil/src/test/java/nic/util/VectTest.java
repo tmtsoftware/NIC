@@ -12,6 +12,9 @@ public class VectTest {
     Vect v1 = new Vect(new double[]{ 0,1,2});
     Vect v2 = new Vect(new double[]{ 5,6,7});
     Vect v3 = new Vect(new double[]{-5,6,0});
+    Vect v4 = new Vect(new double[]{-5,6,0});
+    Vect v5 = new Vect(new double[]{-5,6,0,3});
+
 
     @Test
     public void getters() {
@@ -42,6 +45,13 @@ public class VectTest {
         assertEquals(v_again, v);
         assertNotEquals( v_again, v_other);     // not same object
         assertTrue(v_again.equals(v_other));    // but have the same values
+    }
+
+    @Test
+    public void equals() {
+        assertTrue(v1.equals(v1));  // same object
+        assertTrue(v3.equals(v4));  // different object, same values
+        assertFalse(v3.equals(v5)); // different object, different values&lengths
     }
 
     @Test
