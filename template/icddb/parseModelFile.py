@@ -306,7 +306,7 @@ def writeAlarm(compDir, outDir, prefix, title):
       ##  Linking only works within the document that included the alarm.sec file.
       file.write(getTag(alarm_c,name.split('.')[-1]))
 
-      file.write("<tr><td> {0}.{1} ".format(prefix,name))
+      file.write("<tr><td> "+name)
       file.write("<td> "+','.join(getVal(alarm[i],'severityLevels')))
       file.write("<td> "+getVal(alarm[i],'description'))
       file.write("<td> "+getVal(alarm[i],'probableCause'))
