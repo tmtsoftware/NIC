@@ -7,9 +7,6 @@ import re
 import fnmatch
 from pyhocon import ConfigFactory
 
-# subsystem pub/sub prefixes
-sysPrefix = {'NFIRAOS': 'ao.nfiraos', 'TCS': 'tcs', 'AOESW': 'ao.aoesw'}
-
 # The encoding to generate .sec files.
 DOXYGEN_DOC_ENCODING='utf-8'
 
@@ -189,12 +186,7 @@ def getSubTableStr(tel):
   name = getVal(tel,'name')
   rate = getVal(tel,'requiredRate')
 
-  if subsystem in sysPrefix:
-    prefix = sysPrefix[subsystem]
-  else:
-    prefix = subsystem
-
-  item = "{0}.{1}.{2}".format(prefix,component,name)
+  item = "{0}.{1}.{2}".format(subsystem,component,name)
 
   return item, rate
 
@@ -210,9 +202,10 @@ def writeComp(compDir, outDir):
     return
   conf = ConfigFactory.parse_file(filename)
 
+  subsys = getVal(conf,'subsystem')
   comp = getVal(conf,'component')
   title = getVal(conf,'title')
-  prefix = getVal(conf,'prefix')
+  prefix = subsys+'.'+comp
 
   file.write("The prefix for the {0} is: <em>{1}</em>\n\n".format(title,prefix))
   file.write("{0}<br>\n".format(getVal(conf,'description')))
@@ -303,7 +296,7 @@ def writeAlarm(compDir, outDir, prefix, title):
 
     file.write("The {0} publishes the following alarms:\n\n".format(title))
     
-    file.write("<table>\n<tr><th> Alarm <th> Severity <th> Archived <th> Description\n")
+    file.write("<table>\n<tr><th> Alarm <th> Severity Levels <th> Description <th> Probable Cause <th> Operator Response\n")
     for i in range(0, len(alarm)):
       name = getVal(alarm[i],'name')
       
@@ -313,10 +306,11 @@ def writeAlarm(compDir, outDir, prefix, title):
       ##  Linking only works within the document that included the alarm.sec file.
       file.write(getTag(alarm_c,name.split('.')[-1]))
 
-      file.write("<tr><td> {0}.{1} ".format(prefix,name))
-      file.write("<td> "+getVal(alarm[i],'severity'))
-      file.write("<td> {0}".format(getVal(alarm[i],'archive')))
+      file.write("<tr><td> "+name)
+      file.write("<td> "+','.join(getVal(alarm[i],'severityLevels')))
       file.write("<td> "+getVal(alarm[i],'description'))
+      file.write("<td> "+getVal(alarm[i],'probableCause'))
+      file.write("<td> "+getVal(alarm[i],'operatorResponse'))
     file.write("\n</table>\n\n")
 
   file.close()
