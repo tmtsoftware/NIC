@@ -15,8 +15,8 @@ DATE = $(shell date +%F)
 # current git project root, not necessarily NIC
 PROJ_ROOT := $(shell git rev-parse --show-toplevel)
 
-ifndef NIC
-NIC := ${PROJ_ROOT}/../NIC
+ifndef NIC_ROOT
+NIC_ROOT := ${PROJ_ROOT}/../NIC
 endif
 
 ####################
@@ -29,26 +29,26 @@ endif
 define nic_doxygen_sec
 	$(if ${SUBSYSTEM},,$(error SUBSYSTEM not defined))
 	$(if ${COMP_NAME},,$(error COMP_NAME not defined))
- 	# create directories
+	# create directories
 	mkdir -p tmp
 	# copy common section files (.sec)
-	cp ${NIC}/template/sec/common/* tmp
-	cp ${NIC}/template/sec/${SUBSYSTEM}/* tmp
+	cp ${NIC_ROOT}/template/sec/common/* tmp
+	cp ${NIC_ROOT}/template/sec/${SUBSYSTEM}/* tmp
 	# update asmPurpose section file
 	sed -i -e 's/<<COMP_NAME>>/${COMP_NAME}/g' tmp/*.sec
 	sed -i -e 's/<<SUBSYSTEM>>/${SUBSYSTEM}/g' tmp/*.sec
 endef
 
 # public function for parsing models files for doxygen tech notes
-#	NIC - path to head of NIC project
+#	NIC_ROOT - path to head of NIC project
 #	ICDDB - path to head of subsystem model file project, e.g. ICD-Model-Files/NFIRAOS-Model-Files/
 #	COMP - component short name / directory name in model file project, e.g. dm-assembly
 define nic_doxygen_parse_model
-	$(if ${NIC},,$(error NIC not defined))
+	$(if ${NIC_ROOT},,$(error NIC_ROOT not defined))
 	$(if ${ICDDB},,$(error ICDDB not defined))
 	$(if ${COMP},,$(error COMP not defined))
 	# parse model file
-	${NIC}/template/icddb/parseModelFile.py ${ICDDB} ${COMP} tmp
+	${NIC_ROOT}/template/icddb/parseModelFile.py ${ICDDB} ${COMP} tmp
 endef
 
 # public function for building PDF from doxygen output
