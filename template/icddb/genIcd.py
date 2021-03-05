@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # ICD model file helper: given a target directory tree, generate
 # command-model.conf that sends all commands to assemblies in that
@@ -15,7 +15,7 @@ from pyhocon import ConfigFactory
 #
 
 if (len(sys.argv) < 4):
-    print """genIcd: Generate command-model.conf that sends all commands, and subscribe-model.conf that subscribes to all events, for assemblies under the input model path.
+    print("""genIcd: Generate command-model.conf that sends all commands, and subscribe-model.conf that subscribes to all events, for assemblies under the input model path.
 
 usage:
     genIcd <input model path> <output command-model file> <output subscribe-model file> [skip description string 1] [skip description string 2] ...
@@ -26,7 +26,7 @@ example:
 The following would send all NFIRAOS commands, and subscribe to all NFIRAOS events, with the exception of any commands/events with (engineering) appearing in the first line
 
     genIcd ICD-Model-Files/NFIRAOS-Model-Files command-model.conf subscribe-model.conf "\(engineering\)"
-"""
+""")
     sys.exit(1)
 
 in_dir = sys.argv[1]
@@ -68,8 +68,8 @@ for type in types:
         types[type]['outfile'] = f
         f.write(types[type]['startstr'])
     except Exception as e:
-        print "Error creating output file " + outname + \
-            "({0}): {1}".format(e.errno, e.strerror)
+        print("Error creating output file " + outname + \
+            "({0}): {1}".format(e.errno, e.strerror))
         sys.exit(1)
 
 for root, dirs, files in os.walk(in_dir):
@@ -106,11 +106,11 @@ for root, dirs, files in os.walk(in_dir):
                                 skip = True
                                 break
                         if skip:
-                            print type, subsystem, component, name, \
-                                '[***SKIPPED***]'
+                            print(type, subsystem, component, name, \
+                                '[***SKIPPED***]')
                             continue
 
-                    print type, subsystem, component, name
+                    print(type, subsystem, component, name)
                     s = """%s{
 %s  subsystem  = %s
 %s  component  = %s
@@ -128,5 +128,5 @@ for type in types:
         f.write(types[type]['endstr'])
         f.close()
     except Exception as e:
-        print "Error finalizing output file ({0}): {1}".format(e.errno, e.strerror)
+        print("Error finalizing output file ({0}): {1}".format(e.errno, e.strerror))
         sys.exit(1)
