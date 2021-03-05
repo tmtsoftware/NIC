@@ -1,14 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 
 import os
 import sys
 import re
-import fnmatch
 from pyhocon import ConfigFactory
-
-# The encoding to generate .sec files.
-DOXYGEN_DOC_ENCODING='utf-8'
 
 # Configurations for subsections that render information from model files:
 #
@@ -74,11 +70,8 @@ def getVal(dir,name):
   val = ''
   if name in dir: 
     val = dir[name]
-    
-  if isinstance(val, unicode):
-    return val.encode(DOXYGEN_DOC_ENCODING)
-  else:
-    return val
+  
+  return val
 
 ## parse an enum and build enum list string separated by '|'
 def getEnumStr(enum):
@@ -437,7 +430,7 @@ try:
   writeCmd(compDir,outDir,prefix,title)
 
 except IOError as e:
-  print "I/O error({0}): {1}".format(e.errno, e.strerror)
+  print("I/O error({0}): {1}".format(e.errno, e.strerror))
   file.close()
 
 # end of file
